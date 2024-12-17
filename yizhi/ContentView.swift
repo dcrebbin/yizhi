@@ -16,6 +16,11 @@ extension Calendar {
 }
 
 struct HalftonePattern: View {
+
+    var isDarkMode: Bool {
+        UITraitCollection.current.userInterfaceStyle == .dark
+    }
+
     let rows: Int = 10
     let columns: Int = 40
 
@@ -28,7 +33,7 @@ struct HalftonePattern: View {
             ForEach(0..<rows, id: \.self) { row in
                 ForEach(0..<columns, id: \.self) { column in
                     Circle()
-                        .fill(Color.black)
+                        .fill(isDarkMode ? Color.white : Color.black)
                         .frame(
                             width: dotSize * getDotScale(row: row),
                             height: dotSize * getDotScale(row: row)
@@ -40,8 +45,9 @@ struct HalftonePattern: View {
                 }
             }
         }
-        .background(Color.white)
-        .clipped().edgesIgnoringSafeArea(.all)
+        .frame(maxWidth: .infinity, maxHeight: 70)
+        .background(Color.clear)
+        .clipped()
     }
 
     private func getDotScale(row: Int) -> CGFloat {
@@ -51,6 +57,10 @@ struct HalftonePattern: View {
 }
 
 struct ContentView: View {
+
+    var isDarkMode: Bool {
+        UITraitCollection.current.userInterfaceStyle == .dark
+    }
 
     struct Task {
         let name: String
@@ -79,11 +89,21 @@ struct ContentView: View {
     @State var tasks: [Task] = [Task(name: "Drink water", completed: false)]
 
     func saveTask(task: Task) {
+        print("Saving task: \(task)")
         tasks.append(task)
+        print("Tasks: \(tasks)")
         saveData()
         calculateContribution()
     }
     @State var contributionArray: [Double] = Array(repeating: 0.0, count: 365)
+
+    func setupSavedData() {
+        print("Setting up saved data")
+        let defaults = UserDefaults.standard
+        let data = defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
+        let tasks = defaults.object(forKey: "tasks") as? [Task] ?? []
+        self.tasks = tasks
+    }
 
     func calculateContribution() {
         let defaults = UserDefaults.standard
@@ -124,25 +144,28 @@ struct ContentView: View {
 
     // save data to user defaults
     func saveData() {
+        print("Saving data")
         let defaults = UserDefaults.standard
         defaults.set(savedTasks, forKey: "tasks")
         var data = savedData
         data[todaysDate] = tasks
         defaults.set(data, forKey: "data")
+        print(data)
     }
 
     var body: some View {
         VStack(alignment: .center) {
             HalftonePattern()
-                .frame(width: .infinity, height: 40)
-            Text("一只 yīzhí").font(.system(size: 40))
+            Text("一只 yīzhí")
+                .font(.system(size: 40, design: .serif))
             ScrollView {
                 VStack {
-                    Text("今天 / \(todaysDate)").font(.system(size: 20))
+                    Text("今天 / \(todaysDate)")
+                        .font(.system(size: 20))
                     ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
                         SwipeView {
                             HStack {
-                                Text(task.name)
+                                Text(task.name).font(.system(size: 20, design: .serif))
                                 Spacer()
                                 Button(action: {
                                     tasks[index].completed.toggle()
@@ -151,43 +174,49 @@ struct ContentView: View {
                                         systemName: tasks[index].completed
                                             ? "checkmark.square.fill" : "square"
                                     ).font(.system(size: 24))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(isDarkMode ? Color.white : Color.black)
                                 }
                             }.padding(.horizontal, 20).padding(.vertical, 10)
-                                .background(Color.white)
                         } trailingActions: { context in
                             SwipeAction("Delete") {
                                 tasks.remove(at: index)
                             }
                             .buttonStyle(.borderless)
-                            .foregroundColor(.white)
+                            .foregroundColor(isDarkMode ? Color.black : Color.white)
                             .cornerRadius(0)
-                            .background(.black)
+                            .background(isDarkMode ? Color.black : Color.white)
                         }
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
             HStack {
                 TextField("Add a task", text: $newTask)
+                    .font(.system(size: 20, design: .serif))
                     .textFieldStyle(.plain)
                     .padding()
-                    .tint(.black)
+                    .tint(isDarkMode ? Color.white : Color.black)
+                    .background(isDarkMode ? Color.black : Color.white)
                 Button(action: {
+                    UIApplication.shared.sendAction(
+                        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    print("Adding task: \(newTask)")
                     tasks.append(Task(name: newTask, completed: false))
                     newTask = ""
                 }) {
-                    Text("ADD").foregroundColor(.black)
+                    Text("ADD")
+                        .foregroundColor(isDarkMode ? Color.white : Color.black)
+                        .font(.system(size: 20, design: .serif))
                 }
             }.padding(.horizontal, 25)
             VStack {
-                Text("Consistency").font(.system(size: 20))
+                Text("Consistency").font(.system(size: 20, design: .serif))
                 ScrollView(.horizontal) {
-                    LazyHGrid(rows: Array(repeating: GridItem(.fixed(40)), count: 7), spacing: 4) {
+                    LazyHGrid(rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4) {
                         ForEach(0..<365) { index in
                             RoundedRectangle(cornerRadius: 2)
                                 .fill(contributionColor(for: index))
-                                .border(Color.black, width: 1)
-                                .frame(width: 40, height: 40)
+                                .border(isDarkMode ? Color.white : Color.black, width: 1)
+                                .frame(width: 35, height: 35)
                         }
                     }
                     .padding()
@@ -196,6 +225,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
+            setupSavedData()
             calculateContribution()
         }
     }
