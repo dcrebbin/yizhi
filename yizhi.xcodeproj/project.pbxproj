@@ -7,30 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E7CB695A2D11BFE2009A32BB /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = E7CB69592D11BFE2009A32BB /* SwipeActions */; };
+		E7CB69D12D11D4C4009A32BB /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = E7CB69D02D11D4C4009A32BB /* SwipeActions */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		E7C55AAE2D11B2FE00FB5D56 /* PBXContainerItemProxy */ = {
+		E7CB69B52D11D443009A32BB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E7C55A942D11B2FD00FB5D56 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = E7C55A9B2D11B2FD00FB5D56;
+			remoteGlobalIDString = E7CB69A42D11D440009A32BB;
 			remoteInfo = yizhi;
 		};
-		E7C55AB82D11B2FE00FB5D56 /* PBXContainerItemProxy */ = {
+		E7CB69BF2D11D443009A32BB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E7C55A942D11B2FD00FB5D56 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = E7C55A9B2D11B2FD00FB5D56;
+			remoteGlobalIDString = E7CB69A42D11D440009A32BB;
 			remoteInfo = yizhi;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		E7C55A9C2D11B2FD00FB5D56 /* yizhi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yizhi.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E7C55AAD2D11B2FE00FB5D56 /* yizhiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yizhiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E7C55AB72D11B2FE00FB5D56 /* yizhiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yizhiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7CB69A52D11D440009A32BB /* yizhi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yizhi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7CB69B42D11D443009A32BB /* yizhiTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yizhiTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E7CB69BE2D11D443009A32BB /* yizhiUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = yizhiUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -49,25 +49,40 @@
 			path = yizhiUITests;
 			sourceTree = "<group>";
 		};
+		E7CB69A62D11D440009A32BB /* yizhi */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = yizhi;
+			sourceTree = "<group>";
+		};
+		E7CB69B72D11D443009A32BB /* yizhiTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = yizhiTests;
+			sourceTree = "<group>";
+		};
+		E7CB69C12D11D443009A32BB /* yizhiUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = yizhiUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		E7C55A992D11B2FD00FB5D56 /* Frameworks */ = {
+		E7CB69A22D11D440009A32BB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E7CB695A2D11BFE2009A32BB /* SwipeActions in Frameworks */,
+				E7CB69D12D11D4C4009A32BB /* SwipeActions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E7C55AAA2D11B2FE00FB5D56 /* Frameworks */ = {
+		E7CB69B12D11D443009A32BB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E7C55AB42D11B2FE00FB5D56 /* Frameworks */ = {
+		E7CB69BB2D11D443009A32BB /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -83,6 +98,9 @@
 				E7C55A9E2D11B2FD00FB5D56 /* yizhi */,
 				E7C55AB02D11B2FE00FB5D56 /* yizhiTests */,
 				E7C55ABA2D11B2FE00FB5D56 /* yizhiUITests */,
+				E7CB69A62D11D440009A32BB /* yizhi */,
+				E7CB69B72D11D443009A32BB /* yizhiTests */,
+				E7CB69C12D11D443009A32BB /* yizhiUITests */,
 				E7C55A9D2D11B2FD00FB5D56 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -90,9 +108,9 @@
 		E7C55A9D2D11B2FD00FB5D56 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E7C55A9C2D11B2FD00FB5D56 /* yizhi.app */,
-				E7C55AAD2D11B2FE00FB5D56 /* yizhiTests.xctest */,
-				E7C55AB72D11B2FE00FB5D56 /* yizhiUITests.xctest */,
+				E7CB69A52D11D440009A32BB /* yizhi.app */,
+				E7CB69B42D11D443009A32BB /* yizhiTests.xctest */,
+				E7CB69BE2D11D443009A32BB /* yizhiUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,73 +118,73 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E7C55A9B2D11B2FD00FB5D56 /* yizhi */ = {
+		E7CB69A42D11D440009A32BB /* yizhi */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E7C55AC12D11B2FE00FB5D56 /* Build configuration list for PBXNativeTarget "yizhi" */;
+			buildConfigurationList = E7CB69C62D11D443009A32BB /* Build configuration list for PBXNativeTarget "yizhi" */;
 			buildPhases = (
-				E7C55A982D11B2FD00FB5D56 /* Sources */,
-				E7C55A992D11B2FD00FB5D56 /* Frameworks */,
-				E7C55A9A2D11B2FD00FB5D56 /* Resources */,
+				E7CB69A12D11D440009A32BB /* Sources */,
+				E7CB69A22D11D440009A32BB /* Frameworks */,
+				E7CB69A32D11D440009A32BB /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				E7C55A9E2D11B2FD00FB5D56 /* yizhi */,
+				E7CB69A62D11D440009A32BB /* yizhi */,
 			);
 			name = yizhi;
 			packageProductDependencies = (
-				E7CB69592D11BFE2009A32BB /* SwipeActions */,
+				E7CB69D02D11D4C4009A32BB /* SwipeActions */,
 			);
 			productName = yizhi;
-			productReference = E7C55A9C2D11B2FD00FB5D56 /* yizhi.app */;
+			productReference = E7CB69A52D11D440009A32BB /* yizhi.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E7C55AAC2D11B2FE00FB5D56 /* yizhiTests */ = {
+		E7CB69B32D11D443009A32BB /* yizhiTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E7C55AC42D11B2FE00FB5D56 /* Build configuration list for PBXNativeTarget "yizhiTests" */;
+			buildConfigurationList = E7CB69C92D11D443009A32BB /* Build configuration list for PBXNativeTarget "yizhiTests" */;
 			buildPhases = (
-				E7C55AA92D11B2FE00FB5D56 /* Sources */,
-				E7C55AAA2D11B2FE00FB5D56 /* Frameworks */,
-				E7C55AAB2D11B2FE00FB5D56 /* Resources */,
+				E7CB69B02D11D443009A32BB /* Sources */,
+				E7CB69B12D11D443009A32BB /* Frameworks */,
+				E7CB69B22D11D443009A32BB /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				E7C55AAF2D11B2FE00FB5D56 /* PBXTargetDependency */,
+				E7CB69B62D11D443009A32BB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E7C55AB02D11B2FE00FB5D56 /* yizhiTests */,
+				E7CB69B72D11D443009A32BB /* yizhiTests */,
 			);
 			name = yizhiTests;
 			packageProductDependencies = (
 			);
 			productName = yizhiTests;
-			productReference = E7C55AAD2D11B2FE00FB5D56 /* yizhiTests.xctest */;
+			productReference = E7CB69B42D11D443009A32BB /* yizhiTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		E7C55AB62D11B2FE00FB5D56 /* yizhiUITests */ = {
+		E7CB69BD2D11D443009A32BB /* yizhiUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E7C55AC72D11B2FE00FB5D56 /* Build configuration list for PBXNativeTarget "yizhiUITests" */;
+			buildConfigurationList = E7CB69CC2D11D443009A32BB /* Build configuration list for PBXNativeTarget "yizhiUITests" */;
 			buildPhases = (
-				E7C55AB32D11B2FE00FB5D56 /* Sources */,
-				E7C55AB42D11B2FE00FB5D56 /* Frameworks */,
-				E7C55AB52D11B2FE00FB5D56 /* Resources */,
+				E7CB69BA2D11D443009A32BB /* Sources */,
+				E7CB69BB2D11D443009A32BB /* Frameworks */,
+				E7CB69BC2D11D443009A32BB /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				E7C55AB92D11B2FE00FB5D56 /* PBXTargetDependency */,
+				E7CB69C02D11D443009A32BB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E7C55ABA2D11B2FE00FB5D56 /* yizhiUITests */,
+				E7CB69C12D11D443009A32BB /* yizhiUITests */,
 			);
 			name = yizhiUITests;
 			packageProductDependencies = (
 			);
 			productName = yizhiUITests;
-			productReference = E7C55AB72D11B2FE00FB5D56 /* yizhiUITests.xctest */;
+			productReference = E7CB69BE2D11D443009A32BB /* yizhiUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -179,16 +197,16 @@
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
-					E7C55A9B2D11B2FD00FB5D56 = {
+					E7CB69A42D11D440009A32BB = {
 						CreatedOnToolsVersion = 16.0;
 					};
-					E7C55AAC2D11B2FE00FB5D56 = {
+					E7CB69B32D11D443009A32BB = {
 						CreatedOnToolsVersion = 16.0;
-						TestTargetID = E7C55A9B2D11B2FD00FB5D56;
+						TestTargetID = E7CB69A42D11D440009A32BB;
 					};
-					E7C55AB62D11B2FE00FB5D56 = {
+					E7CB69BD2D11D443009A32BB = {
 						CreatedOnToolsVersion = 16.0;
-						TestTargetID = E7C55A9B2D11B2FD00FB5D56;
+						TestTargetID = E7CB69A42D11D440009A32BB;
 					};
 				};
 			};
@@ -209,29 +227,29 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E7C55A9B2D11B2FD00FB5D56 /* yizhi */,
-				E7C55AAC2D11B2FE00FB5D56 /* yizhiTests */,
-				E7C55AB62D11B2FE00FB5D56 /* yizhiUITests */,
+				E7CB69A42D11D440009A32BB /* yizhi */,
+				E7CB69B32D11D443009A32BB /* yizhiTests */,
+				E7CB69BD2D11D443009A32BB /* yizhiUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		E7C55A9A2D11B2FD00FB5D56 /* Resources */ = {
+		E7CB69A32D11D440009A32BB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E7C55AAB2D11B2FE00FB5D56 /* Resources */ = {
+		E7CB69B22D11D443009A32BB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E7C55AB52D11B2FE00FB5D56 /* Resources */ = {
+		E7CB69BC2D11D443009A32BB /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -241,21 +259,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		E7C55A982D11B2FD00FB5D56 /* Sources */ = {
+		E7CB69A12D11D440009A32BB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E7C55AA92D11B2FE00FB5D56 /* Sources */ = {
+		E7CB69B02D11D443009A32BB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E7C55AB32D11B2FE00FB5D56 /* Sources */ = {
+		E7CB69BA2D11D443009A32BB /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -265,15 +283,15 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		E7C55AAF2D11B2FE00FB5D56 /* PBXTargetDependency */ = {
+		E7CB69B62D11D443009A32BB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E7C55A9B2D11B2FD00FB5D56 /* yizhi */;
-			targetProxy = E7C55AAE2D11B2FE00FB5D56 /* PBXContainerItemProxy */;
+			target = E7CB69A42D11D440009A32BB /* yizhi */;
+			targetProxy = E7CB69B52D11D443009A32BB /* PBXContainerItemProxy */;
 		};
-		E7C55AB92D11B2FE00FB5D56 /* PBXTargetDependency */ = {
+		E7CB69C02D11D443009A32BB /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E7C55A9B2D11B2FD00FB5D56 /* yizhi */;
-			targetProxy = E7C55AB82D11B2FE00FB5D56 /* PBXContainerItemProxy */;
+			target = E7CB69A42D11D440009A32BB /* yizhi */;
+			targetProxy = E7CB69BF2D11D443009A32BB /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -396,69 +414,70 @@
 			};
 			name = Release;
 		};
-		E7C55AC22D11B2FE00FB5D56 /* Debug */ = {
+		E7CB69C72D11D443009A32BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = yizhi/yizhi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"yizhi/Preview Content\"";
 				DEVELOPMENT_TEAM = V4BA83FLD8;
-				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcrebbin.yizhi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		E7C55AC32D11B2FE00FB5D56 /* Release */ = {
+		E7CB69C82D11D443009A32BB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = yizhi/yizhi.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"yizhi/Preview Content\"";
 				DEVELOPMENT_TEAM = V4BA83FLD8;
-				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
-					"@executable_path/../Frameworks",
+					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcrebbin.yizhi;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
-				SUPPORTS_MACCATALYST = NO;
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		E7C55AC52D11B2FE00FB5D56 /* Debug */ = {
+		E7CB69CA2D11D443009A32BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -466,17 +485,19 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V4BA83FLD8;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcrebbin.yizhiTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/yizhi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/yizhi";
 			};
 			name = Debug;
 		};
-		E7C55AC62D11B2FE00FB5D56 /* Release */ = {
+		E7CB69CB2D11D443009A32BB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -484,45 +505,55 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V4BA83FLD8;
 				GENERATE_INFOPLIST_FILE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcrebbin.yizhiTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/yizhi.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/yizhi";
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		E7C55AC82D11B2FE00FB5D56 /* Debug */ = {
+		E7CB69CD2D11D443009A32BB /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V4BA83FLD8;
 				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcrebbin.yizhiUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = yizhi;
 			};
 			name = Debug;
 		};
-		E7C55AC92D11B2FE00FB5D56 /* Release */ = {
+		E7CB69CE2D11D443009A32BB /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = V4BA83FLD8;
 				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dcrebbin.yizhiUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = yizhi;
+				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
@@ -538,29 +569,29 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E7C55AC12D11B2FE00FB5D56 /* Build configuration list for PBXNativeTarget "yizhi" */ = {
+		E7CB69C62D11D443009A32BB /* Build configuration list for PBXNativeTarget "yizhi" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E7C55AC22D11B2FE00FB5D56 /* Debug */,
-				E7C55AC32D11B2FE00FB5D56 /* Release */,
+				E7CB69C72D11D443009A32BB /* Debug */,
+				E7CB69C82D11D443009A32BB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E7C55AC42D11B2FE00FB5D56 /* Build configuration list for PBXNativeTarget "yizhiTests" */ = {
+		E7CB69C92D11D443009A32BB /* Build configuration list for PBXNativeTarget "yizhiTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E7C55AC52D11B2FE00FB5D56 /* Debug */,
-				E7C55AC62D11B2FE00FB5D56 /* Release */,
+				E7CB69CA2D11D443009A32BB /* Debug */,
+				E7CB69CB2D11D443009A32BB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E7C55AC72D11B2FE00FB5D56 /* Build configuration list for PBXNativeTarget "yizhiUITests" */ = {
+		E7CB69CC2D11D443009A32BB /* Build configuration list for PBXNativeTarget "yizhiUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				E7C55AC82D11B2FE00FB5D56 /* Debug */,
-				E7C55AC92D11B2FE00FB5D56 /* Release */,
+				E7CB69CD2D11D443009A32BB /* Debug */,
+				E7CB69CE2D11D443009A32BB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -579,7 +610,7 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		E7CB69592D11BFE2009A32BB /* SwipeActions */ = {
+		E7CB69D02D11D4C4009A32BB /* SwipeActions */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E7C55ACA2D11BEC000FB5D56 /* XCRemoteSwiftPackageReference "SwipeActions" */;
 			productName = SwipeActions;
