@@ -87,7 +87,6 @@ struct ContentView: View {
         else {
             return [:]
         }
-        print("Decoded data: \(decodedData)")
         return decodedData.dictionary
     }
 
@@ -117,10 +116,6 @@ struct ContentView: View {
     }
 
     func calculateContribution() {
-        let defaults = UserDefaults.standard
-        let data = defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
-
-        print("Data: \(data)")
         var newContributionArray = Array(repeating: 0.0, count: 365)
 
         let calendar = Calendar.current
@@ -139,7 +134,7 @@ struct ContentView: View {
             {
                 let dateString = dateFormatter.string(from: date)
 
-                if let tasks = data[dateString] {
+                if let tasks = savedData[dateString] {
                     print("Tasks for \(dateString): \(tasks)")
                     let completedCount = tasks.filter(\.completed).count
                     let percentage =
@@ -181,11 +176,6 @@ struct ContentView: View {
             HalftonePattern()
             Text("一只 yīzhí")
                 .font(.system(size: 40, design: .serif))
-            Button(action: {
-                loadData()
-            }) {
-                Text("Test load")
-            }
             ScrollView {
                 VStack {
                     Text("今天 / \(todaysDate)")
@@ -259,7 +249,7 @@ struct ContentView: View {
 
     private func contributionColor(for index: Int) -> Color {
         let intensity = contributionArray[index]
-        return Color.black.opacity(intensity)
+        return isDarkMode ? Color.white.opacity(intensity) : Color.black.opacity(intensity)
     }
 }
 
