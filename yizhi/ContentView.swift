@@ -174,7 +174,7 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .center) {
             HalftonePattern()
-            Text("一只 yīzhí")
+            Text("一致 yīzhí")
                 .font(.system(size: 40, design: .serif))
             ScrollView {
                 VStack {
@@ -248,7 +248,9 @@ struct ContentView: View {
     }
 
     private func contributionColor(for index: Int) -> Color {
-        let intensity = contributionArray[index]
+
+        print("Contribution array: \(contributionArray)")
+        let intensity = contributionArray[index] / 100.0
         return isDarkMode ? Color.white.opacity(intensity) : Color.black.opacity(intensity)
     }
 }
