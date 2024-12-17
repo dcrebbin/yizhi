@@ -41,11 +41,29 @@ struct ContentView: View {
                         }
                     }.padding(.horizontal, 20).padding(.vertical, 10)
                 }
-            }.frame(maxWidth: .infinity, maxHeight: 200)
-            Spacer()
+            }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
+            VStack {
+                Text("Consistency").font(.system(size: 20))
+                ScrollView(.horizontal) {
+                    LazyHGrid(rows: Array(repeating: GridItem(.fixed(40)), count: 7), spacing: 4) {
+                        ForEach(0..<365) { index in
+                            RoundedRectangle(cornerRadius: 2)
+                                .fill(contributionColor(for: index))
+                                .frame(width: 40, height: 40)
+                        }
+                    }
+                    .padding()
+                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top, 10)
+    }
+
+    private func contributionColor(for index: Int) -> Color {
+        // Mock data - you can replace this with real contribution data
+        let intensity = Double.random(in: 0...1)
+        return Color.black.opacity(intensity)
     }
 }
 
