@@ -67,6 +67,10 @@ struct ContentView: View {
         var completed: Bool
     }
 
+    struct ContributionData: Decodable, Encodable {
+        var dictionary: [String: [Task]] = [:]
+    }
+
     @State var newTask = ""
 
     var todaysDate: String {
@@ -78,7 +82,13 @@ struct ContentView: View {
 
     var savedData: [String: [Task]] {
         let defaults = UserDefaults.standard
-        return defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
+        guard let retrievedData = defaults.data(forKey: "data"),
+            let decodedData = try? JSONDecoder().decode(ContributionData.self, from: retrievedData)
+        else {
+            return [:]
+        }
+        print("Decoded data: \(decodedData)")
+        return decodedData.dictionary
     }
 
     var savedTasks: [Task] {
@@ -88,6 +98,7 @@ struct ContentView: View {
         else {
             return []
         }
+        print("Decoded tasks: \(decodedTasks)")
         return decodedTasks
     }
 
@@ -96,18 +107,20 @@ struct ContentView: View {
 
     func loadData() {
         print("Loading data")
+        let defaults = UserDefaults.standard
+        print("Alt: \(savedData)")
         savedTasks.forEach { task in
 
             tasks.append(Task(name: task.name, completed: task.completed))
             print("Loaded task: \(task)")
         }
-        calculateContribution()
     }
 
     func calculateContribution() {
         let defaults = UserDefaults.standard
         let data = defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
 
+        print("Data: \(data)")
         var newContributionArray = Array(repeating: 0.0, count: 365)
 
         let calendar = Calendar.current
@@ -127,6 +140,7 @@ struct ContentView: View {
                 let dateString = dateFormatter.string(from: date)
 
                 if let tasks = data[dateString] {
+                    print("Tasks for \(dateString): \(tasks)")
                     let completedCount = tasks.filter(\.completed).count
                     let percentage =
                         tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
@@ -141,13 +155,25 @@ struct ContentView: View {
         print("Average Daily Completion for \(year): \(totalContribution / 365.0)%")
     }
 
-    // save data to user defaults
+    @State var contributionData: ContributionData = ContributionData()
+
     func saveData() {
         print("Saving data")
         let defaults = UserDefaults.standard
+
         if let encoded = try? JSONEncoder().encode(tasks) {
             defaults.set(encoded, forKey: "tasks")
         }
+
+        var currentData = savedData
+        currentData[todaysDate] = tasks
+        if let encoded = try? JSONEncoder().encode(ContributionData(dictionary: currentData)) {
+            defaults.set(encoded, forKey: "data")
+        }
+    }
+
+    private func loadContributionData() {
+        calculateContribution()
     }
 
     var body: some View {
@@ -155,6 +181,11 @@ struct ContentView: View {
             HalftonePattern()
             Text("一只 yīzhí")
                 .font(.system(size: 40, design: .serif))
+            Button(action: {
+                loadData()
+            }) {
+                Text("Test load")
+            }
             ScrollView {
                 VStack {
                     Text("今天 / \(todaysDate)")
@@ -166,6 +197,7 @@ struct ContentView: View {
                                 Spacer()
                                 Button(action: {
                                     tasks[index].completed.toggle()
+                                    saveData()
                                 }) {
                                     Image(
                                         systemName: tasks[index].completed
@@ -177,7 +209,8 @@ struct ContentView: View {
                         } trailingActions: { context in
                             SwipeAction("Delete") {
                                 tasks.remove(at: index)
-                            }.foregroundStyle(isDarkMode ? Color.black : Color.white).background(Color.white)
+                                saveData()
+                            }.foregroundStyle(Color.black).background(Color.white)
                         }
                     }
                 }
@@ -220,6 +253,7 @@ struct ContentView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             loadData()
+            loadContributionData()
         }
     }
 
