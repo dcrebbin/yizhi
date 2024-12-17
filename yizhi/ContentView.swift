@@ -177,11 +177,7 @@ struct ContentView: View {
                         } trailingActions: { context in
                             SwipeAction("Delete") {
                                 tasks.remove(at: index)
-                            }
-                            .buttonStyle(.borderless)
-                            .foregroundColor(isDarkMode ? Color.black : Color.white)
-                            .cornerRadius(0)
-                            .background(isDarkMode ? Color.black : Color.white)
+                            }.foregroundStyle(isDarkMode ? Color.black : Color.white).background(Color.white)
                         }
                     }
                 }
