@@ -62,7 +62,7 @@ struct ContentView: View {
         UITraitCollection.current.userInterfaceStyle == .dark
     }
 
-    struct Task {
+    struct Task: Decodable, Encodable {
         let name: String
         var completed: Bool
     }
@@ -83,26 +83,25 @@ struct ContentView: View {
 
     var savedTasks: [Task] {
         let defaults = UserDefaults.standard
-        return defaults.object(forKey: "tasks") as? [Task] ?? []
+        guard let data = defaults.data(forKey: "tasks"),
+            let decodedTasks = try? JSONDecoder().decode([Task].self, from: data)
+        else {
+            return []
+        }
+        return decodedTasks
     }
 
-    @State var tasks: [Task] = [Task(name: "Drink water", completed: false)]
-
-    func saveTask(task: Task) {
-        print("Saving task: \(task)")
-        tasks.append(task)
-        print("Tasks: \(tasks)")
-        saveData()
-        calculateContribution()
-    }
+    @State var tasks: [Task] = []
     @State var contributionArray: [Double] = Array(repeating: 0.0, count: 365)
 
-    func setupSavedData() {
-        print("Setting up saved data")
-        let defaults = UserDefaults.standard
-        let data = defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
-        let tasks = defaults.object(forKey: "tasks") as? [Task] ?? []
-        self.tasks = tasks
+    func loadData() {
+        print("Loading data")
+        savedTasks.forEach { task in
+
+            tasks.append(Task(name: task.name, completed: task.completed))
+            print("Loaded task: \(task)")
+        }
+        calculateContribution()
     }
 
     func calculateContribution() {
@@ -146,11 +145,9 @@ struct ContentView: View {
     func saveData() {
         print("Saving data")
         let defaults = UserDefaults.standard
-        defaults.set(savedTasks, forKey: "tasks")
-        var data = savedData
-        data[todaysDate] = tasks
-        defaults.set(data, forKey: "data")
-        print(data)
+        if let encoded = try? JSONEncoder().encode(tasks) {
+            defaults.set(encoded, forKey: "tasks")
+        }
     }
 
     var body: some View {
@@ -201,6 +198,7 @@ struct ContentView: View {
                         #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     print("Adding task: \(newTask)")
                     tasks.append(Task(name: newTask, completed: false))
+                    saveData()
                     newTask = ""
                 }) {
                     Text("ADD")
@@ -225,8 +223,7 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            setupSavedData()
-            calculateContribution()
+            loadData()
         }
     }
 
