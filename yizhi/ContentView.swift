@@ -15,6 +15,41 @@ extension Calendar {
     }
 }
 
+struct HalftonePattern: View {
+    let rows: Int = 10
+    let columns: Int = 40
+
+    var body: some View {
+        GeometryReader { geometry in
+            let dotSize = min(
+                geometry.size.width / CGFloat(columns),
+                geometry.size.height / CGFloat(rows))
+
+            ForEach(0..<rows, id: \.self) { row in
+                ForEach(0..<columns, id: \.self) { column in
+                    Circle()
+                        .fill(Color.black)
+                        .frame(
+                            width: dotSize * getDotScale(row: row),
+                            height: dotSize * getDotScale(row: row)
+                        )
+                        .position(
+                            x: CGFloat(column) * (geometry.size.width / CGFloat(columns - 1)),
+                            y: CGFloat(row) * (geometry.size.height / CGFloat(rows - 1))
+                        )
+                }
+            }
+        }
+        .background(Color.white)
+        .clipped().edgesIgnoringSafeArea(.all)
+    }
+
+    private func getDotScale(row: Int) -> CGFloat {
+        let progress = CGFloat(row) / CGFloat(rows)
+        return 1.0 - progress
+    }
+}
+
 struct ContentView: View {
 
     struct Task {
@@ -98,33 +133,37 @@ struct ContentView: View {
 
     var body: some View {
         VStack(alignment: .center) {
+            HalftonePattern()
+                .frame(width: .infinity, height: 40)
             Text("一只 yīzhí").font(.system(size: 40))
             ScrollView {
-                Text("今天 / \(todaysDate)").font(.system(size: 20))
-                ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
-                    SwipeView {
-                        HStack {
-                            Text(task.name)
-                            Spacer()
-                            Button(action: {
-                                tasks[index].completed.toggle()
-                            }) {
-                                Image(
-                                    systemName: tasks[index].completed
-                                        ? "checkmark.square.fill" : "square"
-                                ).font(.system(size: 24))
-                                    .foregroundColor(.black)
+                VStack {
+                    Text("今天 / \(todaysDate)").font(.system(size: 20))
+                    ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
+                        SwipeView {
+                            HStack {
+                                Text(task.name)
+                                Spacer()
+                                Button(action: {
+                                    tasks[index].completed.toggle()
+                                }) {
+                                    Image(
+                                        systemName: tasks[index].completed
+                                            ? "checkmark.square.fill" : "square"
+                                    ).font(.system(size: 24))
+                                        .foregroundColor(.black)
+                                }
+                            }.padding(.horizontal, 20).padding(.vertical, 10)
+                                .background(Color.white)
+                        } trailingActions: { context in
+                            SwipeAction("Delete") {
+                                tasks.remove(at: index)
                             }
-                        }.padding(.horizontal, 20).padding(.vertical, 10)
-                            .background(Color.white)
-                    } trailingActions: { context in
-                        SwipeAction("Delete") {
-                            tasks.remove(at: index)
+                            .buttonStyle(.borderless)
+                            .foregroundColor(.white)
+                            .cornerRadius(0)
+                            .background(.black)
                         }
-                        .buttonStyle(.borderless)
-                        .foregroundColor(.white)
-                        .cornerRadius(0)
-                        .background(.black)
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
@@ -156,7 +195,6 @@ struct ContentView: View {
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.top, 10)
         .onAppear {
             calculateContribution()
         }
