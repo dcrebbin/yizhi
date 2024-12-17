@@ -8,6 +8,13 @@
 import SwiftUI
 import SwipeActions
 
+// Helper extension
+extension Calendar {
+    fileprivate func startOfYear(for year: Int) -> Date {
+        date(from: DateComponents(year: year, month: 1, day: 1)) ?? Date()
+    }
+}
+
 struct ContentView: View {
 
     struct Task {
@@ -15,19 +22,85 @@ struct ContentView: View {
         var completed: Bool
     }
 
-    @State var tasks = [
-        Task(name: "task1", completed: false),
-        Task(name: "task2", completed: false),
-        Task(name: "task3", completed: false),
-    ]
-
     @State var newTask = ""
+
+    var todaysDate: String {
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd-MM-yyyy"
+        return formatter.string(from: date)
+    }
+
+    var savedData: [String: [Task]] {
+        let defaults = UserDefaults.standard
+        return defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
+    }
+
+    var savedTasks: [Task] {
+        let defaults = UserDefaults.standard
+        return defaults.object(forKey: "tasks") as? [Task] ?? []
+    }
+
+    @State var tasks: [Task] = [Task(name: "Drink water", completed: false)]
+
+    func saveTask(task: Task) {
+        tasks.append(task)
+        saveData()
+        calculateContribution()
+    }
+    @State var contributionArray: [Double] = Array(repeating: 0.0, count: 365)
+
+    func calculateContribution() {
+        let defaults = UserDefaults.standard
+        let data = defaults.object(forKey: "data") as? [String: [Task]] ?? [:]
+
+        var newContributionArray = Array(repeating: 0.0, count: 365)
+
+        let calendar = Calendar.current
+        let today = Date()
+        let year = calendar.component(.year, from: today)
+
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd-MM-yyyy"
+
+        var totalContribution = 0.0
+
+        for dayOffset in 0..<365 {
+            if let date = calendar.date(
+                byAdding: .day, value: dayOffset,
+                to: calendar.startOfYear(for: year))
+            {
+                let dateString = dateFormatter.string(from: date)
+
+                if let tasks = data[dateString] {
+                    let completedCount = tasks.filter(\.completed).count
+                    let percentage =
+                        tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
+
+                    totalContribution += percentage
+                    newContributionArray[dayOffset] = percentage
+                }
+            }
+        }
+
+        contributionArray = newContributionArray
+        print("Average Daily Completion for \(year): \(totalContribution / 365.0)%")
+    }
+
+    // save data to user defaults
+    func saveData() {
+        let defaults = UserDefaults.standard
+        defaults.set(savedTasks, forKey: "tasks")
+        var data = savedData
+        data[todaysDate] = tasks
+        defaults.set(data, forKey: "data")
+    }
 
     var body: some View {
         VStack(alignment: .center) {
             Text("一只 yīzhí").font(.system(size: 40))
             ScrollView {
-                Text("今天 / today").font(.system(size: 20))
+                Text("今天 / \(todaysDate)").font(.system(size: 20))
                 ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
                     SwipeView {
                         HStack {
@@ -48,8 +121,10 @@ struct ContentView: View {
                         SwipeAction("Delete") {
                             tasks.remove(at: index)
                         }
+                        .buttonStyle(.borderless)
                         .foregroundColor(.white)
-                        .background(.red)
+                        .cornerRadius(0)
+                        .background(.black)
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
@@ -72,6 +147,7 @@ struct ContentView: View {
                         ForEach(0..<365) { index in
                             RoundedRectangle(cornerRadius: 2)
                                 .fill(contributionColor(for: index))
+                                .border(Color.black, width: 1)
                                 .frame(width: 40, height: 40)
                         }
                     }
@@ -81,11 +157,13 @@ struct ContentView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.top, 10)
+        .onAppear {
+            calculateContribution()
+        }
     }
 
     private func contributionColor(for index: Int) -> Color {
-        // Mock data - you can replace this with real contribution data
-        let intensity = Double.random(in: 0...1)
+        let intensity = contributionArray[index]
         return Color.black.opacity(intensity)
     }
 }
