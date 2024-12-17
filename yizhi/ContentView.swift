@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwipeActions
 
 struct ContentView: View {
 
@@ -20,28 +21,50 @@ struct ContentView: View {
         Task(name: "task3", completed: false),
     ]
 
+    @State var newTask = ""
+
     var body: some View {
         VStack(alignment: .center) {
-            Text("一只 yīzhí").font(.system(size: 30))
+            Text("一只 yīzhí").font(.system(size: 40))
             ScrollView {
                 Text("今天 / today").font(.system(size: 20))
                 ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
-                    HStack {
-                        Text(task.name)
-                        Spacer()
-                        //checkbox
-                        Button(action: {
-                            tasks[index].completed.toggle()
-                        }) {
-                            Image(
-                                systemName: tasks[index].completed
-                                    ? "checkmark.square.fill" : "square"
-                            ).font(.system(size: 24))
-                                .foregroundColor(.black)
+                    SwipeView {
+                        HStack {
+                            Text(task.name)
+                            Spacer()
+                            Button(action: {
+                                tasks[index].completed.toggle()
+                            }) {
+                                Image(
+                                    systemName: tasks[index].completed
+                                        ? "checkmark.square.fill" : "square"
+                                ).font(.system(size: 24))
+                                    .foregroundColor(.black)
+                            }
+                        }.padding(.horizontal, 20).padding(.vertical, 10)
+                            .background(Color.white)
+                    } trailingActions: { context in
+                        SwipeAction("Delete") {
+                            tasks.remove(at: index)
                         }
-                    }.padding(.horizontal, 20).padding(.vertical, 10)
+                        .foregroundColor(.white)
+                        .background(.red)
+                    }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
+            HStack {
+                TextField("Add a task", text: $newTask)
+                    .textFieldStyle(.plain)
+                    .padding()
+                    .tint(.black)
+                Button(action: {
+                    tasks.append(Task(name: newTask, completed: false))
+                    newTask = ""
+                }) {
+                    Text("ADD").foregroundColor(.black)
+                }
+            }.padding(.horizontal, 25)
             VStack {
                 Text("Consistency").font(.system(size: 20))
                 ScrollView(.horizontal) {

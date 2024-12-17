@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E7CB695A2D11BFE2009A32BB /* SwipeActions in Frameworks */ = {isa = PBXBuildFile; productRef = E7CB69592D11BFE2009A32BB /* SwipeActions */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		E7C55AAE2D11B2FE00FB5D56 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E7CB695A2D11BFE2009A32BB /* SwipeActions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +117,7 @@
 			);
 			name = yizhi;
 			packageProductDependencies = (
+				E7CB69592D11BFE2009A32BB /* SwipeActions */,
 			);
 			productName = yizhi;
 			productReference = E7C55A9C2D11B2FD00FB5D56 /* yizhi.app */;
@@ -195,6 +201,9 @@
 			);
 			mainGroup = E7C55A932D11B2FC00FB5D56;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E7C55ACA2D11BEC000FB5D56 /* XCRemoteSwiftPackageReference "SwipeActions" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E7C55A9D2D11B2FD00FB5D56 /* Products */;
 			projectDirPath = "";
@@ -557,6 +566,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E7C55ACA2D11BEC000FB5D56 /* XCRemoteSwiftPackageReference "SwipeActions" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/aheze/SwipeActions";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E7CB69592D11BFE2009A32BB /* SwipeActions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E7C55ACA2D11BEC000FB5D56 /* XCRemoteSwiftPackageReference "SwipeActions" */;
+			productName = SwipeActions;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E7C55A942D11B2FD00FB5D56 /* Project object */;
 }
