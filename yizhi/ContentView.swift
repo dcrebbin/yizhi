@@ -72,13 +72,16 @@ struct ContentView: View {
     }
 
     @State var newTask = ""
-
-    var todaysDate: String {
-        let date = Date()
+    
+    @State var currentDate: Date = Date()
+    let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd-MM-yyyy"
-        return formatter.string(from: date)
-    }
+        return formatter
+    }()
+
+    let calendar = Calendar.current
+    let today = Date()
 
     var savedData: [String: [Task]] {
         let defaults = UserDefaults.standard
@@ -107,9 +110,15 @@ struct ContentView: View {
     func loadData() {
         print("Loading data")
         savedTasks.forEach { task in
-            tasks.append(Task(name: task.name, completed: task.completed))
-            print("Loaded task: \(task)")
+            if !(savedData[dateFormatter.string(from: currentDate)]?.contains(where: { $0.name == task.name }) ?? false) {
+                tasks.append(task)
+            }
         }
+        
+        print(savedTasks)
+        print(contributionData)
+
+        saveData()
     }
 
     func calculateContribution() {
@@ -132,7 +141,6 @@ struct ContentView: View {
                 let dateString = dateFormatter.string(from: date)
 
                 if let tasks = savedData[dateString] {
-                    print("Tasks for \(dateString): \(tasks)")
                     let completedCount = tasks.filter(\.completed).count
                     let percentage =
                         tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
@@ -158,7 +166,7 @@ struct ContentView: View {
         }
 
         var currentData = savedData
-        currentData[todaysDate] = tasks
+        currentData[dateFormatter.string(from: currentDate)] = tasks
         if let encoded = try? JSONEncoder().encode(ContributionData(dictionary: currentData)) {
             defaults.set(encoded, forKey: "data")
         }
@@ -168,6 +176,7 @@ struct ContentView: View {
         calculateContribution()
     }
 
+
     var body: some View {
         VStack(alignment: .center) {
             HalftonePattern()
@@ -175,8 +184,39 @@ struct ContentView: View {
                 .font(.system(size: 40, design: .serif))
             ScrollView {
                 VStack {
-                    Text("今天 / \(todaysDate)")
-                        .font(.system(size: 20))
+                    HStack {
+                        Button(action: {
+                            currentDate =
+                                calendar.date(
+                                    byAdding: .day, value: -1, to: currentDate) ?? Date()
+                            let dateString = dateFormatter.string(from: currentDate)
+                            tasks = savedData[dateString] ?? []
+                            loadData()
+                        }) {
+                            Text("<")
+                                .font(.system(size: 20, design: .serif))
+                                .foregroundColor(isDarkMode ? Color.white : Color.black)
+                        }
+                        Text(
+                            dateFormatter.string(from: currentDate)
+                                == dateFormatter.string(from: today)
+                                ? ("今天 \(dateFormatter.string(from: today))")
+                                : (dateFormatter.string(from: currentDate))
+                        )
+                        .font(.system(size: 20, design: .serif))
+                        Button(action: {
+                            currentDate =
+                                calendar.date(
+                                    byAdding: .day, value: 1, to: currentDate) ?? Date()
+                            let dateString = dateFormatter.string(from: currentDate)
+                            tasks = savedData[dateString] ?? []
+                            loadData()
+                        }) {
+                            Text(">")
+                                .font(.system(size: 20, design: .serif))
+                                .foregroundColor(isDarkMode ? Color.white : Color.black)
+                        }
+                    }
                     ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
                         SwipeView {
                             HStack {
@@ -245,7 +285,6 @@ struct ContentView: View {
     }
 
     private func contributionColor(for index: Int) -> Color {
-        print("Contribution array: \(contributionArray)")
         let intensity = contributionArray[index] / 100.0
         return isDarkMode ? Color.white.opacity(intensity) : Color.black.opacity(intensity)
     }
