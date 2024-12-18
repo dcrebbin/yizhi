@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwipeActions
+import UserNotifications
 
 // Helper extension
 extension Calendar {
@@ -72,7 +73,7 @@ struct ContentView: View {
     }
 
     @State var newTask = ""
-    
+
     @State var currentDate: Date = Date()
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -107,18 +108,36 @@ struct ContentView: View {
     @State var tasks: [Task] = []
     @State var contributionArray: [Double] = Array(repeating: 0.0, count: 365)
 
+    @State private var notificationsEnabled = false
+
+    private func setupNotifications() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+            granted, error in
+            DispatchQueue.main.async {
+                self.notificationsEnabled = granted
+                if granted {
+                    print("Notification permission granted")
+                    // Register for remote notifications
+                    UIApplication.shared.registerForRemoteNotifications()
+                } else {
+                    print("Notification permission denied")
+                }
+            }
+        }
+    }
+
     func loadData() {
         print("Loading data")
+        tasks = []
         savedTasks.forEach { task in
-            if !(savedData[dateFormatter.string(from: currentDate)]?.contains(where: { $0.name == task.name }) ?? false) {
+            if !(savedData[dateFormatter.string(from: currentDate)]?.contains(where: {
+                $0.name == task.name
+            }) ?? false) {
                 tasks.append(task)
             }
         }
-        
-        print(savedTasks)
-        print(contributionData)
 
-        saveData()
+        // saveData()
     }
 
     func calculateContribution() {
@@ -176,7 +195,6 @@ struct ContentView: View {
         calculateContribution()
     }
 
-
     var body: some View {
         VStack(alignment: .center) {
             HalftonePattern()
@@ -184,6 +202,31 @@ struct ContentView: View {
                 .font(.system(size: 40, design: .serif))
             ScrollView {
                 VStack {
+                    Button(action: {
+                        //trigger post notification in 30 seconds
+                        //request permission
+                        UNUserNotificationCenter.current().requestAuthorization(options: [
+                            .alert, .sound, .badge,
+                        ]) {
+                            (granted, error) in
+                            if granted {
+                                print("Notification permission granted")
+                            } else {
+                                print("Notification permission denied")
+                            }
+                        }
+
+                        let content = UNMutableNotificationContent()
+                        content.title = "一致"
+                        content.body = "Time to update your tasks!\n现在更新你的任务吧！"
+                        let trigger = UNTimeIntervalNotificationTrigger(
+                            timeInterval: 5, repeats: false)
+                        let request = UNNotificationRequest(
+                            identifier: "一致", content: content, trigger: trigger)
+                        UNUserNotificationCenter.current().add(request)
+                    }) {
+                        Text("Notif")
+                    }
                     HStack {
                         Button(action: {
                             currentDate =
@@ -248,7 +291,12 @@ struct ContentView: View {
                     .textFieldStyle(.plain)
                     .padding()
                     .tint(isDarkMode ? Color.white : Color.black)
-                    .background(isDarkMode ? Color.black : Color.white)
+                    .background(isDarkMode ? Color.black : Color.white).onSubmit {
+                        print("Adding task: \(newTask)")
+                        tasks.append(Task(name: newTask, completed: false))
+                        saveData()
+                        newTask = ""
+                    }
                 Button(action: {
                     UIApplication.shared.sendAction(
                         #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
@@ -267,10 +315,18 @@ struct ContentView: View {
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4) {
                         ForEach(0..<365) { index in
-                            RoundedRectangle(cornerRadius: 2)
-                                .fill(contributionColor(for: index))
-                                .border(isDarkMode ? Color.white : Color.black, width: 1)
-                                .frame(width: 35, height: 35)
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(contributionColor(for: index))
+                                    .border(isDarkMode ? Color.white : Color.black, width: 1)
+                                    .frame(width: 35, height: 35)
+                                if index == determineTodayIndex() {
+                                    Text("今天")
+                                        .font(.system(size: 12))
+                                        .foregroundColor(isDarkMode ? .white : .black).background(
+                                            isDarkMode ? .black : .white)
+                                }
+                            }
                         }
                     }
                     .padding()
@@ -281,7 +337,18 @@ struct ContentView: View {
         .onAppear {
             loadData()
             loadContributionData()
+            setupNotifications()
         }
+    }
+
+    private func determineTodayIndex() -> Int {
+        let calendar = Calendar.current
+        let today = Date()
+        let year = calendar.component(.year, from: today)
+        let startOfYear = calendar.startOfYear(for: year)
+        let daysSinceStartOfYear =
+            calendar.dateComponents([.day], from: startOfYear, to: today).day ?? 0
+        return daysSinceStartOfYear + 1
     }
 
     private func contributionColor(for index: Int) -> Color {
