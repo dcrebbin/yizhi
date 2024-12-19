@@ -134,7 +134,7 @@ struct ContentView: View {
 
         tasks = tasks.filter { task in
             task.deletedAt != nil
-                ? (calendar.startOfDay(for: task.deletedAt!) < startOfDay
+                ? (calendar.startOfDay(for: task.deletedAt!) >= startOfDay
                     && calendar.startOfDay(for: task.createdAt) <= startOfDay)
                 : calendar.startOfDay(for: task.createdAt) <= startOfDay
         }
@@ -143,7 +143,7 @@ struct ContentView: View {
     }
 
     func calculateContribution() {
-        let newContributionArray = Array(repeating: 0.0, count: 366)
+        var newContributionArray = Array(repeating: 0.0, count: 366)
 
         let calendar = Calendar.current
         let today = Date()
@@ -152,7 +152,7 @@ struct ContentView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
 
-        let totalContribution = 0.0
+        var totalContribution = 0.0
 
         for dayOffset in 0..<366 {
             if let date = calendar.date(
@@ -161,14 +161,14 @@ struct ContentView: View {
             {
                 let dateString = dateFormatter.string(from: date)
 
-                //                if let tasks = savedData[dateString] {
-                //                    let completedCount = tasks.filter(\.completed).count
-                //                    let percentage =
-                //                        tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
-                //
-                //                    totalContribution += percentage
-                //                    newContributionArray[dayOffset] = percentage
-                //                }
+                if let tasks = savedData[dateString] {
+                    let completedCount = tasks.filter(\.completed).count
+                    let percentage =
+                        tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
+
+                    totalContribution += percentage
+                    newContributionArray[dayOffset] = percentage
+                }
             }
         }
 
@@ -179,11 +179,11 @@ struct ContentView: View {
     @State var contributionData: ContributionData = ContributionData()
 
     func addTask() {
-        print("Adding task: \(newTaskName), created at: \(Date())")
+        print("Adding task: \(newTaskName), created at: \(currentDate)")
         tasks.append(
             Task(
                 id: UUID().uuidString,
-                name: newTaskName, completed: false, createdAt: Date(),
+                name: newTaskName, completed: false, createdAt: currentDate,
                 deletedAt: nil
             )
         )
@@ -193,12 +193,16 @@ struct ContentView: View {
 
     func saveContributionData() {
         let defaults = UserDefaults.standard
+        savedData[dateFormatter.string(from: calendar.startOfDay(for: currentDate))] = tasks
+        print("Saving contribution data:", savedData)
         let encoded = try? JSONEncoder().encode(ContributionData(dictionary: savedData))
         defaults.set(encoded, forKey: "data")
     }
 
     func saveTasksData() {
         let defaults = UserDefaults.standard
+
+        print("Saving tasks:", tasks)
         let encoded = try? JSONEncoder().encode(tasks)
         defaults.set(encoded, forKey: "tasks")
     }
