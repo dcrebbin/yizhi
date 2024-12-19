@@ -72,7 +72,7 @@ struct ContentView: View {
     }
 
     struct ContributionData: Decodable, Encodable {
-        var dictionary: [String: [Task]] = [:]
+        var dictionary: [String: [String: Task]] = [:]
     }
 
     @State var newTaskName = ""
@@ -87,11 +87,11 @@ struct ContentView: View {
     let calendar = Calendar.current
     let today = Date()
 
-    @State var savedData: [String: [Task]] = [:]
+    @State var savedData: [String: [String: Task]] = [:]
 
-    var savedTasks: [Task] = []
+    var savedTasks: [String: Task] = [:]
 
-    @State var tasks: [Task] = []
+    @State var tasks: [String: Task] = [:]
     @State var contributionArray: [Double] = Array(repeating: 0.0, count: 366)
 
     @State private var notificationsEnabled = false
@@ -123,23 +123,22 @@ struct ContentView: View {
                 ContributionData.self, from: retrievedData)
         {
             savedData = decodedContributionData.dictionary
-            print("Loaded contribution data:", decodedContributionData)
         }
 
         if let retrievedTasksData = defaults.data(forKey: "tasks"),
-            let decodedTasks = try? JSONDecoder().decode([Task].self, from: retrievedTasksData)
+            let decodedTasks = try? JSONDecoder().decode(
+                [String: Task].self, from: retrievedTasksData)
         {
             tasks = decodedTasks
         }
 
-        tasks = tasks.filter { task in
+        tasks = tasks.filter { id, task in
             task.deletedAt != nil
                 ? (calendar.startOfDay(for: task.deletedAt!) >= startOfDay
                     && calendar.startOfDay(for: task.createdAt) <= startOfDay)
                 : calendar.startOfDay(for: task.createdAt) <= startOfDay
         }
 
-        print("Today's tasks:", tasks)
     }
 
     func calculateContribution() {
@@ -160,9 +159,8 @@ struct ContentView: View {
                 to: calendar.startOfYear(for: year))
             {
                 let dateString = dateFormatter.string(from: date)
-
                 if let tasks = savedData[dateString] {
-                    let completedCount = tasks.filter(\.completed).count
+                    let completedCount = tasks.filter { $0.value.completed }.count
                     let percentage =
                         tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
 
@@ -180,12 +178,11 @@ struct ContentView: View {
 
     func addTask() {
         print("Adding task: \(newTaskName), created at: \(currentDate)")
-        tasks.append(
-            Task(
-                id: UUID().uuidString,
-                name: newTaskName, completed: false, createdAt: currentDate,
-                deletedAt: nil
-            )
+        let id = UUID().uuidString
+        tasks[id] = Task(
+            id: id,
+            name: newTaskName, completed: false, createdAt: currentDate,
+            deletedAt: nil
         )
         saveTasksData()
         newTaskName = ""
@@ -193,7 +190,6 @@ struct ContentView: View {
 
     func saveContributionData() {
         let defaults = UserDefaults.standard
-        savedData[dateFormatter.string(from: calendar.startOfDay(for: currentDate))] = tasks
         print("Saving contribution data:", savedData)
         let encoded = try? JSONEncoder().encode(ContributionData(dictionary: savedData))
         defaults.set(encoded, forKey: "data")
@@ -246,8 +242,9 @@ struct ContentView: View {
                             currentDate =
                                 calendar.date(
                                     byAdding: .day, value: -1, to: currentDate) ?? Date()
-                            let dateString = dateFormatter.string(from: currentDate)
-                            tasks = savedData[dateString] ?? []
+                            let dateString = dateFormatter.string(
+                                from: calendar.startOfDay(for: currentDate))
+                            tasks = savedData[dateString] ?? [:]
                             loadData()
                         }) {
                             Text("<")
@@ -255,18 +252,19 @@ struct ContentView: View {
                                 .foregroundColor(isDarkMode ? Color.white : Color.black)
                         }
                         Text(
-                            dateFormatter.string(from: currentDate)
-                                == dateFormatter.string(from: today)
-                                ? ("今天 \(dateFormatter.string(from: today))")
-                                : (dateFormatter.string(from: currentDate))
+                            dateFormatter.string(from: calendar.startOfDay(for: today))
+                                == dateFormatter.string(from: calendar.startOfDay(for: currentDate))
+                                ? ("今天 \(dateFormatter.string(from: calendar.startOfDay(for: currentDate)))")
+                                : (dateFormatter.string(from: calendar.startOfDay(for: currentDate)))
                         )
                         .font(.system(size: 20, design: .serif))
                         Button(action: {
                             currentDate =
                                 calendar.date(
                                     byAdding: .day, value: 1, to: currentDate) ?? Date()
-                            let dateString = dateFormatter.string(from: currentDate)
-                            tasks = savedData[dateString] ?? []
+                            let dateString = dateFormatter.string(
+                                from: calendar.startOfDay(for: currentDate))
+                            tasks = savedData[dateString] ?? [:]
                             loadData()
                         }) {
                             Text(">")
@@ -274,17 +272,29 @@ struct ContentView: View {
                                 .foregroundColor(isDarkMode ? Color.white : Color.black)
                         }
                     }
-                    ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
+                    ForEach(
+                        Array(tasks.values).sorted(by: { $0.createdAt < $1.createdAt }), id: \.id
+                    ) { task in
                         SwipeView {
                             HStack {
                                 Text(task.name).font(.system(size: 20, design: .serif))
                                 Spacer()
                                 Button(action: {
-                                    tasks[index].completed.toggle()
+                                    let dateString = dateFormatter.string(
+                                        from: calendar.startOfDay(for: currentDate))
+                                    var taskData = savedData[dateString]?[task.id]
+                                    taskData?.completed.toggle()
+                                    print("Toggling task \(task.id) to \(taskData?.completed)")
+                                    savedData[dateString]?[task.id] = taskData
                                     saveContributionData()
+
                                 }) {
                                     Image(
-                                        systemName: tasks[index].completed
+                                        systemName: ((savedData[
+                                            dateFormatter.string(
+                                                from: calendar.startOfDay(for: currentDate))]?[
+                                                task.id
+                                            ]?.completed) ?? false)
                                             ? "checkmark.square.fill" : "square"
                                     ).font(.system(size: 24))
                                         .foregroundColor(isDarkMode ? Color.white : Color.black)
@@ -292,7 +302,7 @@ struct ContentView: View {
                             }.padding(.horizontal, 20).padding(.vertical, 10)
                         } trailingActions: { context in
                             SwipeAction("Delete") {
-                                tasks[index].deletedAt = calendar.startOfDay(for: currentDate)
+                                tasks[task.id]?.deletedAt = calendar.startOfDay(for: currentDate)
                                 saveTasksData()
                             }.foregroundStyle(Color.black).background(Color.white)
                         }
@@ -357,7 +367,7 @@ struct ContentView: View {
         let startOfYear = calendar.startOfYear(for: year)
         let daysSinceStartOfYear =
             calendar.dateComponents([.day], from: startOfYear, to: today).day ?? 0
-        return daysSinceStartOfYear + 1
+        return daysSinceStartOfYear
     }
 
     private func contributionColor(for index: Int) -> Color {
