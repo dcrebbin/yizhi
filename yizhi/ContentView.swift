@@ -214,29 +214,29 @@ struct ContentView: View {
                 .font(.system(size: 40, design: .serif))
             ScrollView {
                 VStack {
-                    Button(action: {
-                        UNUserNotificationCenter.current().requestAuthorization(options: [
-                            .alert, .sound, .badge,
-                        ]) {
-                            (granted, error) in
-                            if granted {
-                                print("Notification permission granted")
-                            } else {
-                                print("Notification permission denied")
-                            }
-                        }
+                    // Button(action: {
+                    //     UNUserNotificationCenter.current().requestAuthorization(options: [
+                    //         .alert, .sound, .badge,
+                    //     ]) {
+                    //         (granted, error) in
+                    //         if granted {
+                    //             print("Notification permission granted")
+                    //         } else {
+                    //             print("Notification permission denied")
+                    //         }
+                    //     }
 
-                        let content = UNMutableNotificationContent()
-                        content.title = "一致"
-                        content.body = "Time to update your tasks!\n现在更新你的任务吧！"
-                        let trigger = UNTimeIntervalNotificationTrigger(
-                            timeInterval: 5, repeats: false)
-                        let request = UNNotificationRequest(
-                            identifier: "一致", content: content, trigger: trigger)
-                        UNUserNotificationCenter.current().add(request)
-                    }) {
-                        Text("Notif")
-                    }
+                    //     let content = UNMutableNotificationContent()
+                    //     content.title = "一致"
+                    //     content.body = "Time to update your tasks!\n现在更新你的任务吧！"
+                    //     let trigger = UNTimeIntervalNotificationTrigger(
+                    //         timeInterval: 5, repeats: false)
+                    //     let request = UNNotificationRequest(
+                    //         identifier: "一致", content: content, trigger: trigger)
+                    //     UNUserNotificationCenter.current().add(request)
+                    // }) {
+                    //     Text("Notif")
+                    // }
                     HStack {
                         Button(action: {
                             currentDate =
@@ -282,9 +282,16 @@ struct ContentView: View {
                                 Button(action: {
                                     let dateString = dateFormatter.string(
                                         from: calendar.startOfDay(for: currentDate))
-                                    var taskData = savedData[dateString]?[task.id]
-                                    taskData?.completed.toggle()
-                                    print("Toggling task \(task.id) to \(taskData?.completed)")
+                                    if savedData[dateString] == nil {
+                                        savedData[dateString] = [:]
+                                    }
+                                    var taskData =
+                                        savedData[dateString]?[task.id]
+                                        ?? Task(
+                                            id: task.id, name: task.name, completed: false,
+                                            createdAt: task.createdAt, deletedAt: task.deletedAt)
+                                    taskData.completed.toggle()
+                                    print("Toggling task \(task.id) to \(taskData.completed)")
                                     savedData[dateString]?[task.id] = taskData
                                     saveContributionData()
 
