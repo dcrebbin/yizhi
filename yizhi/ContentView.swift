@@ -64,15 +64,18 @@ struct ContentView: View {
     }
 
     struct Task: Decodable, Encodable {
+        var id: String
         let name: String
         var completed: Bool
+        var createdAt: Date
+        var deletedAt: Date?
     }
 
     struct ContributionData: Decodable, Encodable {
         var dictionary: [String: [Task]] = [:]
     }
 
-    @State var newTask = ""
+    @State var newTaskName = ""
 
     @State var currentDate: Date = Date()
     let dateFormatter: DateFormatter = {
@@ -84,29 +87,12 @@ struct ContentView: View {
     let calendar = Calendar.current
     let today = Date()
 
-    var savedData: [String: [Task]] {
-        let defaults = UserDefaults.standard
-        guard let retrievedData = defaults.data(forKey: "data"),
-            let decodedData = try? JSONDecoder().decode(ContributionData.self, from: retrievedData)
-        else {
-            return [:]
-        }
-        return decodedData.dictionary
-    }
+    @State var savedData: [String: [Task]] = [:]
 
-    var savedTasks: [Task] {
-        let defaults = UserDefaults.standard
-        guard let data = defaults.data(forKey: "tasks"),
-            let decodedTasks = try? JSONDecoder().decode([Task].self, from: data)
-        else {
-            return []
-        }
-        print("Decoded tasks: \(decodedTasks)")
-        return decodedTasks
-    }
+    var savedTasks: [Task] = []
 
     @State var tasks: [Task] = []
-    @State var contributionArray: [Double] = Array(repeating: 0.0, count: 365)
+    @State var contributionArray: [Double] = Array(repeating: 0.0, count: 366)
 
     @State private var notificationsEnabled = false
 
@@ -127,21 +113,37 @@ struct ContentView: View {
     }
 
     func loadData() {
-        print("Loading data")
-        tasks = []
-        savedTasks.forEach { task in
-            if !(savedData[dateFormatter.string(from: currentDate)]?.contains(where: {
-                $0.name == task.name
-            }) ?? false) {
-                tasks.append(task)
-            }
+        let defaults = UserDefaults.standard
+        let startOfDay = calendar.startOfDay(for: currentDate)
+        let todayString = dateFormatter.string(from: startOfDay)
+
+        // Load contribution data
+        if let retrievedData = defaults.data(forKey: "data"),
+            let decodedContributionData = try? JSONDecoder().decode(
+                ContributionData.self, from: retrievedData)
+        {
+            savedData = decodedContributionData.dictionary
+            print("Loaded contribution data:", decodedContributionData)
         }
 
-        // saveData()
+        if let retrievedTasksData = defaults.data(forKey: "tasks"),
+            let decodedTasks = try? JSONDecoder().decode([Task].self, from: retrievedTasksData)
+        {
+            tasks = decodedTasks
+        }
+
+        tasks = tasks.filter { task in
+            task.deletedAt != nil
+                ? (calendar.startOfDay(for: task.deletedAt!) < startOfDay
+                    && calendar.startOfDay(for: task.createdAt) <= startOfDay)
+                : calendar.startOfDay(for: task.createdAt) <= startOfDay
+        }
+
+        print("Today's tasks:", tasks)
     }
 
     func calculateContribution() {
-        var newContributionArray = Array(repeating: 0.0, count: 365)
+        let newContributionArray = Array(repeating: 0.0, count: 366)
 
         let calendar = Calendar.current
         let today = Date()
@@ -150,45 +152,55 @@ struct ContentView: View {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd-MM-yyyy"
 
-        var totalContribution = 0.0
+        let totalContribution = 0.0
 
-        for dayOffset in 0..<365 {
+        for dayOffset in 0..<366 {
             if let date = calendar.date(
                 byAdding: .day, value: dayOffset,
                 to: calendar.startOfYear(for: year))
             {
                 let dateString = dateFormatter.string(from: date)
 
-                if let tasks = savedData[dateString] {
-                    let completedCount = tasks.filter(\.completed).count
-                    let percentage =
-                        tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
-
-                    totalContribution += percentage
-                    newContributionArray[dayOffset] = percentage
-                }
+                //                if let tasks = savedData[dateString] {
+                //                    let completedCount = tasks.filter(\.completed).count
+                //                    let percentage =
+                //                        tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
+                //
+                //                    totalContribution += percentage
+                //                    newContributionArray[dayOffset] = percentage
+                //                }
             }
         }
 
         contributionArray = newContributionArray
-        print("Average Daily Completion for \(year): \(totalContribution / 365.0)%")
+        print("Average Daily Completion for \(year): \(totalContribution / 366.0)%")
     }
 
     @State var contributionData: ContributionData = ContributionData()
 
-    func saveData() {
-        print("Saving data")
+    func addTask() {
+        print("Adding task: \(newTaskName), created at: \(Date())")
+        tasks.append(
+            Task(
+                id: UUID().uuidString,
+                name: newTaskName, completed: false, createdAt: Date(),
+                deletedAt: nil
+            )
+        )
+        saveTasksData()
+        newTaskName = ""
+    }
+
+    func saveContributionData() {
         let defaults = UserDefaults.standard
+        let encoded = try? JSONEncoder().encode(ContributionData(dictionary: savedData))
+        defaults.set(encoded, forKey: "data")
+    }
 
-        if let encoded = try? JSONEncoder().encode(tasks) {
-            defaults.set(encoded, forKey: "tasks")
-        }
-
-        var currentData = savedData
-        currentData[dateFormatter.string(from: currentDate)] = tasks
-        if let encoded = try? JSONEncoder().encode(ContributionData(dictionary: currentData)) {
-            defaults.set(encoded, forKey: "data")
-        }
+    func saveTasksData() {
+        let defaults = UserDefaults.standard
+        let encoded = try? JSONEncoder().encode(tasks)
+        defaults.set(encoded, forKey: "tasks")
     }
 
     private func loadContributionData() {
@@ -203,8 +215,6 @@ struct ContentView: View {
             ScrollView {
                 VStack {
                     Button(action: {
-                        //trigger post notification in 30 seconds
-                        //request permission
                         UNUserNotificationCenter.current().requestAuthorization(options: [
                             .alert, .sound, .badge,
                         ]) {
@@ -260,14 +270,14 @@ struct ContentView: View {
                                 .foregroundColor(isDarkMode ? Color.white : Color.black)
                         }
                     }
-                    ForEach(Array(tasks.enumerated()), id: \.offset) { index, task in
+                    ForEach(Array(tasks.enumerated()), id: \.element.id) { index, task in
                         SwipeView {
                             HStack {
                                 Text(task.name).font(.system(size: 20, design: .serif))
                                 Spacer()
                                 Button(action: {
                                     tasks[index].completed.toggle()
-                                    saveData()
+                                    saveContributionData()
                                 }) {
                                     Image(
                                         systemName: tasks[index].completed
@@ -278,32 +288,27 @@ struct ContentView: View {
                             }.padding(.horizontal, 20).padding(.vertical, 10)
                         } trailingActions: { context in
                             SwipeAction("Delete") {
-                                tasks.remove(at: index)
-                                saveData()
+                                tasks[index].deletedAt = calendar.startOfDay(for: currentDate)
+                                saveTasksData()
                             }.foregroundStyle(Color.black).background(Color.white)
                         }
                     }
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
             HStack {
-                TextField("Add a task", text: $newTask)
+                TextField("Add a task", text: $newTaskName)
                     .font(.system(size: 20, design: .serif))
                     .textFieldStyle(.plain)
                     .padding()
                     .tint(isDarkMode ? Color.white : Color.black)
                     .background(isDarkMode ? Color.black : Color.white).onSubmit {
-                        print("Adding task: \(newTask)")
-                        tasks.append(Task(name: newTask, completed: false))
-                        saveData()
-                        newTask = ""
+                        addTask()
                     }
                 Button(action: {
                     UIApplication.shared.sendAction(
                         #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    print("Adding task: \(newTask)")
-                    tasks.append(Task(name: newTask, completed: false))
-                    saveData()
-                    newTask = ""
+                    print("Adding task: \(newTaskName), created at: \(Date())")
+                    addTask()
                 }) {
                     Text("ADD")
                         .foregroundColor(isDarkMode ? Color.white : Color.black)
@@ -314,7 +319,7 @@ struct ContentView: View {
                 Text("Consistency").font(.system(size: 20, design: .serif))
                 ScrollView(.horizontal) {
                     LazyHGrid(rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4) {
-                        ForEach(0..<365) { index in
+                        ForEach(0..<366) { index in
                             ZStack {
                                 RoundedRectangle(cornerRadius: 2)
                                     .fill(contributionColor(for: index))
