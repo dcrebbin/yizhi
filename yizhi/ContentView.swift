@@ -24,6 +24,7 @@ struct HalftonePattern: View {
 
     let rows: Int = 10
     let columns: Int = 40
+    
 
     var body: some View {
         GeometryReader { geometry in
@@ -163,15 +164,18 @@ struct ContentView: View {
                 let dateString = dateFormatter.string(from: date)
 
                 if let filteredTasks = savedData[dateString]?.filter({ $0.value.deletedAt == nil })
-                {
+                {   
+                    print("tasks: \(tasks)")
 
+                    let allFilteredTasks = tasks.filter { $0.value.createdAt >= date }
+                    print("allFilteredTasks: \(allFilteredTasks)")
                     let completedCount = filteredTasks.filter { $0.value.completed }.count
                     print("completedCount: \(completedCount)")
                     print("filteredTasks.count: \(filteredTasks.count)")
                     let percentage =
                         filteredTasks.isEmpty
-                        ? 0.0 : (Double(completedCount) / Double(filteredTasks.count)) * 100.0
-
+                        ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
+        
                     totalContribution += percentage
                     newContributionArray[dayOffset] = percentage
                 }
@@ -360,6 +364,17 @@ struct ContentView: View {
             }
             VStack {
                 Text("Consistency").font(.system(size: 20, design: .serif))
+                Button(action: {
+                    let defaults = UserDefaults.standard
+                    defaults.removeObject(forKey: "data")
+                    defaults.removeObject(forKey: "tasks")
+                    savedData = [:]
+                    tasks = [:]
+                    loadData()
+                    loadContributionData()
+                }) {
+                    Text("Clear Data")
+                }
                 ScrollView(.horizontal) {
                     LazyHGrid(
                             rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4
@@ -384,6 +399,9 @@ struct ContentView: View {
                     }.frame(maxWidth: .infinity, maxHeight: .infinity)
             }.frame(maxWidth: .infinity, maxHeight: .infinity).tabItem {
                 Label("Tracking", systemImage: "chart.bar").foregroundColor(.black)
+            }.onAppear {
+                loadData()
+                loadContributionData()
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity).onAppear {
             loadData()
