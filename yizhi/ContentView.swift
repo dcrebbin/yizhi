@@ -134,10 +134,12 @@ struct ContentView: View {
 
         tasks = tasks.filter { id, task in
             task.deletedAt != nil
-                ? (calendar.startOfDay(for: task.deletedAt!) >= startOfDay
+                ? (calendar.startOfDay(for: task.deletedAt!) > startOfDay
                     && calendar.startOfDay(for: task.createdAt) <= startOfDay)
                 : calendar.startOfDay(for: task.createdAt) <= startOfDay
         }
+
+        tasks = Dictionary(uniqueKeysWithValues: tasks.sorted(by: { $0.value.createdAt < $1.value.createdAt }))
 
     }
 
@@ -159,10 +161,16 @@ struct ContentView: View {
                 to: calendar.startOfYear(for: year))
             {
                 let dateString = dateFormatter.string(from: date)
-                if let tasks = savedData[dateString] {
-                    let completedCount = tasks.filter { $0.value.completed }.count
+
+                if let filteredTasks = savedData[dateString]?.filter({ $0.value.deletedAt == nil })
+                {
+
+                    let completedCount = filteredTasks.filter { $0.value.completed }.count
+                    print("completedCount: \(completedCount)")
+                    print("filteredTasks.count: \(filteredTasks.count)")
                     let percentage =
-                        tasks.isEmpty ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
+                        filteredTasks.isEmpty
+                        ? 0.0 : (Double(completedCount) / Double(filteredTasks.count)) * 100.0
 
                     totalContribution += percentage
                     newContributionArray[dayOffset] = percentage
@@ -212,32 +220,9 @@ struct ContentView: View {
             HalftonePattern()
             Text("一致 yīzhí")
                 .font(.system(size: 40, design: .serif))
-            ScrollView {
+            TabView() {
                 VStack {
-                    // Button(action: {
-                    //     UNUserNotificationCenter.current().requestAuthorization(options: [
-                    //         .alert, .sound, .badge,
-                    //     ]) {
-                    //         (granted, error) in
-                    //         if granted {
-                    //             print("Notification permission granted")
-                    //         } else {
-                    //             print("Notification permission denied")
-                    //         }
-                    //     }
-
-                    //     let content = UNMutableNotificationContent()
-                    //     content.title = "一致"
-                    //     content.body = "Time to update your tasks!\n现在更新你的任务吧！"
-                    //     let trigger = UNTimeIntervalNotificationTrigger(
-                    //         timeInterval: 5, repeats: false)
-                    //     let request = UNNotificationRequest(
-                    //         identifier: "一致", content: content, trigger: trigger)
-                    //     UNUserNotificationCenter.current().add(request)
-                    // }) {
-                    //     Text("Notif")
-                    // }
-                    HStack {
+                    HStack(alignment: .center, spacing: 20) {
                         Button(action: {
                             currentDate =
                                 calendar.date(
@@ -248,7 +233,7 @@ struct ContentView: View {
                             loadData()
                         }) {
                             Text("<")
-                                .font(.system(size: 20, design: .serif))
+                                .font(.system(size: 30, design: .serif))
                                 .foregroundColor(isDarkMode ? Color.white : Color.black)
                         }
                         Text(
@@ -268,103 +253,144 @@ struct ContentView: View {
                             loadData()
                         }) {
                             Text(">")
-                                .font(.system(size: 20, design: .serif))
+                                .font(.system(size: 30, design: .serif))
                                 .foregroundColor(isDarkMode ? Color.white : Color.black)
                         }
                     }
-                    ForEach(
-                        Array(tasks.values).sorted(by: { $0.createdAt < $1.createdAt }), id: \.id
-                    ) { task in
-                        SwipeView {
-                            HStack {
-                                Text(task.name).font(.system(size: 20, design: .serif))
-                                Spacer()
-                                Button(action: {
-                                    let dateString = dateFormatter.string(
-                                        from: calendar.startOfDay(for: currentDate))
-                                    if savedData[dateString] == nil {
-                                        savedData[dateString] = [:]
-                                    }
-                                    var taskData =
-                                        savedData[dateString]?[task.id]
-                                        ?? Task(
-                                            id: task.id, name: task.name, completed: false,
-                                            createdAt: task.createdAt, deletedAt: task.deletedAt)
-                                    taskData.completed.toggle()
-                                    print("Toggling task \(task.id) to \(taskData.completed)")
-                                    savedData[dateString]?[task.id] = taskData
-                                    saveContributionData()
+                    ScrollView {
+                        VStack {
+                            // Button(action: {
+                            //     UNUserNotificationCenter.current().requestAuthorization(options: [
+                            //         .alert, .sound, .badge,
+                            //     ]) {
+                            //         (granted, error) in
+                            //         if granted {
+                            //             print("Notification permission granted")
+                            //         } else {
+                            //             print("Notification permission denied")
+                            //         }
+                            //     }
 
-                                }) {
-                                    Image(
-                                        systemName: ((savedData[
-                                            dateFormatter.string(
-                                                from: calendar.startOfDay(for: currentDate))]?[
-                                                task.id
-                                            ]?.completed) ?? false)
-                                            ? "checkmark.square.fill" : "square"
-                                    ).font(.system(size: 24))
-                                        .foregroundColor(isDarkMode ? Color.white : Color.black)
-                                }
-                            }.padding(.horizontal, 20).padding(.vertical, 10)
-                        } trailingActions: { context in
-                            SwipeAction("Delete") {
-                                tasks[task.id]?.deletedAt = calendar.startOfDay(for: currentDate)
-                                saveTasksData()
-                            }.foregroundStyle(Color.black).background(Color.white)
-                        }
-                    }
-                }
-            }.frame(maxWidth: .infinity, maxHeight: .infinity / 2)
-            HStack {
-                TextField("Add a task", text: $newTaskName)
-                    .font(.system(size: 20, design: .serif))
-                    .textFieldStyle(.plain)
-                    .padding()
-                    .tint(isDarkMode ? Color.white : Color.black)
-                    .background(isDarkMode ? Color.black : Color.white).onSubmit {
-                        addTask()
-                    }
-                Button(action: {
-                    UIApplication.shared.sendAction(
-                        #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
-                    print("Adding task: \(newTaskName), created at: \(Date())")
-                    addTask()
-                }) {
-                    Text("ADD")
-                        .foregroundColor(isDarkMode ? Color.white : Color.black)
-                        .font(.system(size: 20, design: .serif))
-                }
-            }.padding(.horizontal, 25)
-            VStack {
-                Text("Consistency").font(.system(size: 20, design: .serif))
-                ScrollView(.horizontal) {
-                    LazyHGrid(rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4) {
-                        ForEach(0..<366) { index in
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(contributionColor(for: index))
-                                    .border(isDarkMode ? Color.white : Color.black, width: 1)
-                                    .frame(width: 35, height: 35)
-                                if index == determineTodayIndex() {
-                                    Text("今天")
-                                        .font(.system(size: 12))
-                                        .foregroundColor(isDarkMode ? .white : .black).background(
-                                            isDarkMode ? .black : .white)
+                            //     let content = UNMutableNotificationContent()
+                            //     content.title = "一致"
+                            //     content.body = "Time to update your tasks!\n现在更新你的任务吧！"
+                            //     let trigger = UNTimeIntervalNotificationTrigger(
+                            //         timeInterval: 5, repeats: false)
+                            //     let request = UNNotificationRequest(
+                            //         identifier: "一致", content: content, trigger: trigger)
+                            //     UNUserNotificationCenter.current().add(request)
+                            // }) {
+                            //     Text("Notif")
+                            // }
+
+                            ForEach(
+                                Array(tasks.values).sorted(by: { $0.name < $1.name }),
+                                id: \.id
+                            ) { task in
+                                SwipeView {
+                                    HStack {
+                                        Text(task.name).font(.system(size: 20, design: .serif))
+                                        Spacer()
+                                        Button(action: {
+                                            let dateString = dateFormatter.string(
+                                                from: calendar.startOfDay(for: currentDate))
+                                            if savedData[dateString] == nil {
+                                                savedData[dateString] = [:]
+                                            }
+                                            var taskData =
+                                                savedData[dateString]?[task.id]
+                                                ?? Task(
+                                                    id: task.id, name: task.name, completed: false,
+                                                    createdAt: task.createdAt,
+                                                    deletedAt: task.deletedAt)
+                                            taskData.completed.toggle()
+                                            print(
+                                                "Toggling task \(task.id) to \(taskData.completed)")
+                                            savedData[dateString]?[task.id] = taskData
+                                            saveContributionData()
+
+                                        }) {
+                                            Image(
+                                                systemName: ((savedData[
+                                                    dateFormatter.string(
+                                                        from: calendar.startOfDay(for: currentDate))
+                                                ]?[
+                                                    task.id
+                                                ]?.completed) ?? false)
+                                                    ? "checkmark.square.fill" : "square"
+                                            ).font(.system(size: 24))
+                                                .foregroundColor(
+                                                    isDarkMode ? Color.white : Color.black)
+                                        }
+                                    }.padding(.horizontal, 20).padding(.vertical, 10)
+                                } trailingActions: { context in
+                                    SwipeAction("Delete") {
+                                        tasks[task.id]?.deletedAt = calendar.startOfDay(
+                                            for: currentDate)
+                                        loadData()
+                                        saveTasksData()
+                                    }.foregroundStyle(Color.black).background(Color.white)
                                 }
                             }
                         }
                     }
-                    .padding()
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
-            }.frame(maxWidth: .infinity, maxHeight: .infinity)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear {
+                    HStack {
+                        TextField("Add a task", text: $newTaskName)
+                            .font(.system(size: 20, design: .serif))
+                            .textFieldStyle(.plain)
+                            .padding()
+                            .tint(isDarkMode ? Color.white : Color.black)
+                            .background(isDarkMode ? Color.black : Color.white).onSubmit {
+                                addTask()
+                            }
+                        Button(action: {
+                            UIApplication.shared.sendAction(
+                                #selector(UIResponder.resignFirstResponder), to: nil, from: nil,
+                                for: nil)
+                            print("Adding task: \(newTaskName), created at: \(Date())")
+                            addTask()
+                        }) {
+                            Text("ADD")
+                                .foregroundColor(isDarkMode ? Color.white : Color.black)
+                                .font(.system(size: 20, design: .serif))
+                        }
+                    }.padding(.horizontal, 25)
+                }.tabItem {
+                Label("Tasks", systemImage: "list.bullet").foregroundColor(.black)
+            }
+            VStack {
+                Text("Consistency").font(.system(size: 20, design: .serif))
+                ScrollView(.horizontal) {
+                    LazyHGrid(
+                            rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4
+                        ) {
+                            ForEach(0..<366) { index in
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 2)
+                                        .fill(contributionColor(for: index))
+                                        .border(isDarkMode ? Color.white : Color.black, width: 1)
+                                        .frame(width: 35, height: 35)
+                                    if index == determineTodayIndex() {
+                                        Text("今天")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(isDarkMode ? .white : .black)
+                                            .background(
+                                                isDarkMode ? .black : .white)
+                                    }
+                                }
+                            }
+                        }
+                        .padding()
+                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            }.frame(maxWidth: .infinity, maxHeight: .infinity).tabItem {
+                Label("Tracking", systemImage: "chart.bar").foregroundColor(.black)
+            }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity).onAppear {
             loadData()
             loadContributionData()
             setupNotifications()
         }
+    }
     }
 
     private func determineTodayIndex() -> Int {
@@ -379,6 +405,10 @@ struct ContentView: View {
 
     private func contributionColor(for index: Int) -> Color {
         let intensity = contributionArray[index] / 100.0
+        if intensity > 0 {
+            print(contributionArray[index])
+            print(intensity)
+        }
         return isDarkMode ? Color.white.opacity(intensity) : Color.black.opacity(intensity)
     }
 }
