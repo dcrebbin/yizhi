@@ -148,8 +148,10 @@ struct ContentView: View {
   func calculateContribution() {
     var newContributionArray = Array(repeating: 0.0, count: 366)
 
-    let calendar = Calendar.current
+    // Use the existing calendar instance from the class
     let today = Date()
+    let startOfYear = calendar.date(
+      from: DateComponents(year: calendar.component(.year, from: today), month: 1, day: 1))!
     let year = calendar.component(.year, from: today)
 
     let dateFormatter = DateFormatter()
@@ -163,13 +165,33 @@ struct ContentView: View {
         to: calendar.startOfYear(for: year))
       {
         let dateString = dateFormatter.string(from: date)
+        let startOfDay = calendar.startOfDay(for: date)
 
-        if let filteredTasks = savedData[dateString]?.filter({ $0.value.deletedAt == nil }) {
-          let allFilteredTasks = tasks.filter { $0.value.createdAt >= date }
-          let completedCount = filteredTasks.filter { $0.value.completed }.count
+        if let filteredTasks = savedData[dateString]?.filter({ id, task in
+          task.deletedAt != nil
+            ? (calendar.startOfDay(for: task.deletedAt!) > startOfDay
+              && calendar.startOfDay(for: task.createdAt) <= startOfDay)
+            : calendar.startOfDay(for: task.createdAt) <= startOfDay
+        }) {
+
+          let availableTasks = savedTasks.filter { id, task in
+            task.deletedAt != nil
+              ? (calendar.startOfDay(for: task.deletedAt!) > startOfDay
+                && calendar.startOfDay(for: task.createdAt) <= startOfDay)
+              : calendar.startOfDay(for: task.createdAt) <= startOfDay
+          }
+
+          let completedCount = filteredTasks.filter { id, task in
+            task.completed
+          }.count
+
           let percentage =
-            filteredTasks.isEmpty
-            ? 0.0 : (Double(completedCount) / Double(tasks.count)) * 100.0
+            availableTasks.isEmpty
+            ? 0.0 : (Double(completedCount) / Double(availableTasks.count)) * 100.0
+
+          print(
+            "Date: \(dateString), Available tasks:", availableTasks.count, "Completed tasks:",
+            completedCount, "Percentage:", percentage)
 
           totalContribution += percentage
           newContributionArray[dayOffset] = percentage
