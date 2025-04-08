@@ -65,10 +65,12 @@ struct ContentView: View {
 
   struct Task: Decodable, Encodable {
     var id: String
-    let name: String
+    var name: String
     var completed: Bool
     var createdAt: Date
     var deletedAt: Date?
+    var isEditing: Bool = false
+    var editingName: String = ""
   }
 
   struct ContributionData: Decodable, Encodable {
@@ -259,28 +261,76 @@ struct ContentView: View {
   }
 
   func singleTaskView(task: Task) -> some View {
+    let dateString = dateFormatter.string(
+      from: calendar.startOfDay(for: currentDate))
+
+    func editTaskCompleted() {
+      if savedData[dateString] == nil {
+        savedData[dateString] = [:]
+      }
+      var taskData =
+        savedData[dateString]?[task.id]
+        ?? Task(
+          id: task.id, name: task.name, completed: false,
+          createdAt: task.createdAt,
+          deletedAt: task.deletedAt, isEditing: false, editingName: "")
+      taskData.completed.toggle()
+      print(
+        "Toggling task \(task.id) to \(taskData.completed)")
+      savedData[dateString]?[task.id] = taskData
+      saveContributionData()
+    }
+
+    func deleteTask() {
+      print("Deleting task", task.id)
+      tasks[task.id]?.deletedAt = calendar.startOfDay(
+        for: currentDate)
+      saveTasksData()
+      loadData()
+    }
+
+    func editTask() {
+      print("Edit")
+      tasks[task.id]?.isEditing = true
+      tasks[task.id]?.editingName = tasks[task.id]?.name ?? ""
+    }
+
+    func taskField() -> some View {
+      func editTaskName() {
+        if let editingName = tasks[task.id]?.editingName {
+          print("Editing task \(task.name) to \(editingName)")
+          tasks[task.id]?.name = editingName
+          tasks[task.id]?.isEditing = false
+          saveTasksData()
+        }
+      }
+
+      return TextField(
+        "Edit task",
+        text: Binding(
+          get: { tasks[task.id]?.editingName ?? "" },
+          set: { tasks[task.id]?.editingName = $0 }
+        )
+      )
+      .onSubmit {
+        editTaskName()
+      }
+      .font(.system(size: 20, design: .serif))
+      .textFieldStyle(.plain)
+      .background(isDarkMode ? Color.white : Color.black)
+      .foregroundColor(isDarkMode ? Color.black : Color.white)
+    }
+
     return SwipeView {
       HStack {
-        Text(task.name).font(.system(size: 20, design: .serif))
+        if task.isEditing {
+          taskField()
+        } else {
+          Text(task.name).font(.system(size: 20, design: .serif))
+        }
         Spacer()
         Button(action: {
-          let dateString = dateFormatter.string(
-            from: calendar.startOfDay(for: currentDate))
-          if savedData[dateString] == nil {
-            savedData[dateString] = [:]
-          }
-          var taskData =
-            savedData[dateString]?[task.id]
-            ?? Task(
-              id: task.id, name: task.name, completed: false,
-              createdAt: task.createdAt,
-              deletedAt: task.deletedAt)
-          taskData.completed.toggle()
-          print(
-            "Toggling task \(task.id) to \(taskData.completed)")
-          savedData[dateString]?[task.id] = taskData
-          saveContributionData()
-
+          editTaskCompleted()
         }) {
           Image(
             systemName: ((savedData[
@@ -295,14 +345,13 @@ struct ContentView: View {
               isDarkMode ? Color.white : Color.black)
         }
       }.padding(.horizontal, 20).padding(.vertical, 10)
+    } leadingActions: { context in
+      SwipeAction("Edit") {
+        editTask()
+      }
     } trailingActions: { context in
       SwipeAction("Delete") {
-        print("Deleting task", task.id)
-        tasks[task.id]?.deletedAt = calendar.startOfDay(
-          for: currentDate)
-
-        saveTasksData()
-        loadData()
+        deleteTask()
       }.foregroundStyle(Color.black).background(Color.white)
     }
   }
@@ -314,7 +363,8 @@ struct ContentView: View {
           Array(tasks.values).sorted(by: { $0.name < $1.name }),
           id: \.id
         ) { task in
-          singleTaskView(task: task)
+          singleTaskView(
+            task: task)
         }
       }
     }
