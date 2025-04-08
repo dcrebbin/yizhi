@@ -89,7 +89,7 @@ struct ContentView: View {
 
   @State var savedData: [String: [String: Task]] = [:]
 
-  var savedTasks: [String: Task] = [:]
+  @State var savedTasks: [String: Task] = [:]
 
   @State var tasks: [String: Task] = [:]
   @State var contributionArray: [Double] = Array(repeating: 0.0, count: 366)
@@ -130,6 +130,7 @@ struct ContentView: View {
         [String: Task].self, from: retrievedTasksData)
     {
       tasks = decodedTasks
+      savedTasks = decodedTasks
     }
 
     tasks = tasks.filter { id, task in
