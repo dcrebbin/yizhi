@@ -456,6 +456,17 @@ struct ContentView: View {
       HalftonePattern()
       Text("一致 yīzhí")
         .font(.system(size: 40, design: .serif))
+      Spacer()
+      Link("by Langpal話朋", destination: URL(string: "https://langpal.com.hk")!)
+        .font(.system(size: 16, design: .serif))
+        .foregroundColor(.white)
+        .overlay(
+          Rectangle()
+            .frame(height: 1)
+            .offset(y: 1)
+            .foregroundColor(.white),
+          alignment: .bottom
+        )
       TabView {
         taskView().tabItem {
           Label("Tasks", systemImage: "list.bullet").foregroundColor(.black)
