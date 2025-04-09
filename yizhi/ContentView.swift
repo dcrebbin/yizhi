@@ -21,7 +21,9 @@ struct HalftonePattern: View {
   var isDarkMode: Bool {
     UITraitCollection.current.userInterfaceStyle == .dark
   }
-
+  var isIPad: Bool {
+    UIDevice.current.userInterfaceIdiom == .pad
+  }
   let rows: Int = 10
   let columns: Int = 40
 
@@ -46,7 +48,7 @@ struct HalftonePattern: View {
         }
       }
     }
-    .frame(maxWidth: .infinity, maxHeight: 70)
+    .frame(maxWidth: .infinity, maxHeight: isIPad ? 130 : 70)
     .background(Color.clear)
     .clipped()
   }
@@ -59,6 +61,9 @@ struct HalftonePattern: View {
 
 struct ContentView: View {
 
+  var isIPad: Bool {
+    UIDevice.current.userInterfaceIdiom == .pad
+  }
   var isDarkMode: Bool {
     UITraitCollection.current.userInterfaceStyle == .dark
   }
@@ -98,28 +103,11 @@ struct ContentView: View {
 
   @State private var notificationsEnabled = false
 
-  private func setupNotifications() {
-    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
-      granted, error in
-      DispatchQueue.main.async {
-        self.notificationsEnabled = granted
-        if granted {
-          print("Notification permission granted")
-          // Register for remote notifications
-          UIApplication.shared.registerForRemoteNotifications()
-        } else {
-          print("Notification permission denied")
-        }
-      }
-    }
-  }
-
   func loadData() {
     let defaults = UserDefaults.standard
     let startOfDay = calendar.startOfDay(for: currentDate)
     let todayString = dateFormatter.string(from: startOfDay)
 
-    // Load contribution data
     if let retrievedData = defaults.data(forKey: "data"),
       let decodedContributionData = try? JSONDecoder().decode(
         ContributionData.self, from: retrievedData)
@@ -191,10 +179,6 @@ struct ContentView: View {
             availableTasks.isEmpty
             ? 0.0 : (Double(completedCount) / Double(availableTasks.count)) * 100.0
 
-          print(
-            "Date: \(dateString), Available tasks:", availableTasks.count, "Completed tasks:",
-            completedCount, "Percentage:", percentage)
-
           totalContribution += percentage
           newContributionArray[dayOffset] = percentage
         }
@@ -206,29 +190,30 @@ struct ContentView: View {
   @State var contributionData: ContributionData = ContributionData()
 
   func addTask() {
-    print("Adding task: \(newTaskName), created at: \(currentDate)")
+    if newTaskName.isEmpty || newTaskName == "" {
+      return
+    }
+
     let id = UUID().uuidString
-    tasks[id] = Task(
+    savedTasks[id] = Task(
       id: id,
       name: newTaskName, completed: false, createdAt: currentDate,
       deletedAt: nil
     )
+    tasks[id] = savedTasks[id]
     saveTasksData()
     newTaskName = ""
   }
 
   func saveContributionData() {
     let defaults = UserDefaults.standard
-    print("Saving contribution data:", savedData)
     let encoded = try? JSONEncoder().encode(ContributionData(dictionary: savedData))
     defaults.set(encoded, forKey: "data")
   }
 
   func saveTasksData() {
     let defaults = UserDefaults.standard
-
-    print("Saving tasks:", tasks)
-    let encoded = try? JSONEncoder().encode(tasks)
+    let encoded = try? JSONEncoder().encode(savedTasks)
     defaults.set(encoded, forKey: "tasks")
   }
 
@@ -238,24 +223,22 @@ struct ContentView: View {
 
   func addTaskView() -> some View {
     HStack {
-      TextField("Add a task", text: $newTaskName)
-        .font(.system(size: 20, design: .serif))
+      TextField("Add new task", text: $newTaskName)
+        .font(.system(size: isIPad ? 30 : 20, design: .serif))
         .textFieldStyle(.plain)
         .padding()
-        .tint(isDarkMode ? Color.white : Color.black)
-        .background(isDarkMode ? Color.black : Color.white).onSubmit {
+        .tint(isDarkMode ? Color.white : Color.black).onSubmit {
           addTask()
         }
       Button(action: {
         UIApplication.shared.sendAction(
           #selector(UIResponder.resignFirstResponder), to: nil, from: nil,
           for: nil)
-        print("Adding task: \(newTaskName), created at: \(Date())")
         addTask()
       }) {
         Text("ADD")
           .foregroundColor(isDarkMode ? Color.white : Color.black)
-          .font(.system(size: 20, design: .serif))
+          .font(.system(size: isIPad ? 30 : 20, design: .serif))
       }
     }.padding(.horizontal, 25)
   }
@@ -275,14 +258,11 @@ struct ContentView: View {
           createdAt: task.createdAt,
           deletedAt: task.deletedAt, isEditing: false, editingName: "")
       taskData.completed.toggle()
-      print(
-        "Toggling task \(task.id) to \(taskData.completed)")
       savedData[dateString]?[task.id] = taskData
       saveContributionData()
     }
 
     func deleteTask() {
-      print("Deleting task", task.id)
       tasks[task.id]?.deletedAt = calendar.startOfDay(
         for: currentDate)
       saveTasksData()
@@ -290,7 +270,6 @@ struct ContentView: View {
     }
 
     func editTask() {
-      print("Edit")
       tasks[task.id]?.isEditing = true
       tasks[task.id]?.editingName = tasks[task.id]?.name ?? ""
     }
@@ -298,7 +277,6 @@ struct ContentView: View {
     func taskField() -> some View {
       func editTaskName() {
         if let editingName = tasks[task.id]?.editingName {
-          print("Editing task \(task.name) to \(editingName)")
           tasks[task.id]?.name = editingName
           tasks[task.id]?.isEditing = false
           saveTasksData()
@@ -315,7 +293,7 @@ struct ContentView: View {
       .onSubmit {
         editTaskName()
       }
-      .font(.system(size: 20, design: .serif))
+      .font(.system(size: isIPad ? 30 : 20, design: .serif))
       .textFieldStyle(.plain)
       .background(isDarkMode ? Color.white : Color.black)
       .foregroundColor(isDarkMode ? Color.black : Color.white)
@@ -326,7 +304,7 @@ struct ContentView: View {
         if task.isEditing {
           taskField()
         } else {
-          Text(task.name).font(.system(size: 20, design: .serif))
+          Text(task.name).font(.system(size: isIPad ? 30 : 20, design: .serif))
         }
         Spacer()
         Button(action: {
@@ -340,7 +318,7 @@ struct ContentView: View {
               task.id
             ]?.completed) ?? false)
               ? "checkmark.square.fill" : "square"
-          ).font(.system(size: 24))
+          ).font(.system(size: isIPad ? 30 : 24))
             .foregroundColor(
               isDarkMode ? Color.white : Color.black)
         }
@@ -383,7 +361,7 @@ struct ContentView: View {
           loadData()
         }) {
           Text("<")
-            .font(.system(size: 30, design: .serif))
+            .font(.system(size: isIPad ? 30 : 20, design: .serif))
             .foregroundColor(isDarkMode ? Color.white : Color.black)
         }
         Text(
@@ -392,7 +370,7 @@ struct ContentView: View {
             ? ("今天 \(dateFormatter.string(from: calendar.startOfDay(for: currentDate)))")
             : (dateFormatter.string(from: calendar.startOfDay(for: currentDate)))
         )
-        .font(.system(size: 20, design: .serif))
+        .font(.system(size: isIPad ? 30 : 20, design: .serif))
         Button(action: {
           currentDate =
             calendar.date(
@@ -403,18 +381,17 @@ struct ContentView: View {
           loadData()
         }) {
           Text(">")
-            .font(.system(size: 30, design: .serif))
+            .font(.system(size: isIPad ? 30 : 20, design: .serif))
             .foregroundColor(isDarkMode ? Color.white : Color.black)
         }
       }
       taskListView()
       addTaskView()
-    }
+    }.padding(.horizontal, isIPad ? 50 : 20)
   }
 
   func trackingView() -> some View {
     return VStack {
-      Text("Consistency").font(.system(size: 20, design: .serif))
       Button(action: {
         let defaults = UserDefaults.standard
         defaults.removeObject(forKey: "data")
@@ -424,21 +401,28 @@ struct ContentView: View {
         loadData()
         loadContributionData()
       }) {
-        Text("Clear Data")
+        HStack {
+          Text("Clear Data")
+            .font(.system(size: isIPad ? 30 : 20, design: .serif))
+            .foregroundColor(isDarkMode ? Color.white : Color.black)
+          Image(systemName: "trash")
+            .font(.system(size: isIPad ? 30 : 20, design: .serif))
+            .foregroundColor(isDarkMode ? Color.white : Color.black)
+        }
       }
-      ScrollView(.horizontal) {
-        LazyHGrid(
-          rows: Array(repeating: GridItem(.fixed(35)), count: 7), spacing: 4
+      ScrollView(.vertical) {
+        LazyVGrid(
+          columns: Array(repeating: GridItem(.fixed(isIPad ? 75 : 35)), count: 7), spacing: 4
         ) {
           ForEach(0..<366) { index in
             ZStack {
               RoundedRectangle(cornerRadius: 2)
                 .fill(contributionColor(for: index))
                 .border(isDarkMode ? Color.white : Color.black, width: 1)
-                .frame(width: 35, height: 35)
+                .frame(width: isIPad ? 75 : 35, height: isIPad ? 75 : 35)
               if index == determineTodayIndex() {
                 Text("今天")
-                  .font(.system(size: 12))
+                  .font(.system(size: isIPad ? 20 : 12, design: .serif))
                   .foregroundColor(isDarkMode ? .white : .black)
                   .background(
                     isDarkMode ? .black : .white)
@@ -455,32 +439,57 @@ struct ContentView: View {
     VStack(alignment: .center) {
       HalftonePattern()
       Text("一致 yīzhí")
-        .font(.system(size: 40, design: .serif))
+        .font(.system(size: isIPad ? 50 : 24, design: .serif))
       Spacer()
-      Link("by Langpal話朋", destination: URL(string: "https://langpal.com.hk")!)
-        .font(.system(size: 16, design: .serif))
-        .foregroundColor(.white)
-        .overlay(
-          Rectangle()
-            .frame(height: 1)
-            .offset(y: 1)
-            .foregroundColor(.white),
-          alignment: .bottom
-        )
+      HStack {
+        Link("by Langpal話朋", destination: URL(string: "https://langpal.com.hk")!)
+          .font(.system(size: isIPad ? 20 : 16, design: .serif))
+          .foregroundColor(isDarkMode ? .white : .black)
+          .overlay(
+            Rectangle()
+              .frame(height: 1)
+              .offset(y: 1)
+              .foregroundColor(isDarkMode ? .white : .black),
+            alignment: .bottom
+          )
+        Link(destination: URL(string: "mailto:devon@langpal.com.hk")!) {
+          Image(systemName: "envelope")
+            .font(.system(size: isIPad ? 20 : 10, design: .serif))
+            .foregroundColor(isDarkMode ? .white : .black)
+        }
+      }
       TabView {
-        taskView().tabItem {
-          Label("Tasks", systemImage: "list.bullet").foregroundColor(.black)
-        }
-        trackingView().tabItem {
-          Label("Tracking", systemImage: "chart.bar").foregroundColor(.black)
-        }.onAppear {
-          loadData()
-          loadContributionData()
-        }
-      }.frame(maxWidth: .infinity, maxHeight: .infinity).onAppear {
+        taskView()
+          .tabItem {
+            Label("Tasks", systemImage: "list.bullet")
+          }
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        trackingView()
+          .tabItem {
+            Label("Tracking", systemImage: "chart.bar")
+          }
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+          .onAppear {
+            loadData()
+            loadContributionData()
+          }
+      }
+      .frame(maxWidth: .infinity, maxHeight: .infinity)
+      .accentColor(isDarkMode ? .white : .black)
+      .onAppear {
         loadData()
         loadContributionData()
-        setupNotifications()
+
+        // Set tab bar appearance
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = isDarkMode ? .black : .white
+
+        UITabBar.appearance().standardAppearance = appearance
+        if #available(iOS 15.0, *) {
+          UITabBar.appearance().scrollEdgeAppearance = appearance
+        }
       }
     }
   }
